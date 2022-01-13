@@ -1,0 +1,1 @@
+uid=1000(seanmacdonald) gid=1000(seanmacdonald) groups=1000(seanmacdonald),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),107(input),108(kvm),121(lpadmin),132(lxd),133(sambashare),136(libvirt),997(microk8s),998(docker)

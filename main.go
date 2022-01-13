@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/fsnotify/fsnotify"
+
+	"github.com/rjeczalik/notify"
 	"log"
 	"net/http"
 )
@@ -13,44 +14,32 @@ import (
 //	constants
 const ssePath = "/.hak/fs/sse"
 
-//	watcher needs to be global (for now until I figure out how Go works)
-var watcher, watcherBootstrapError = fsnotify.NewWatcher()
-
-type FsEvent struct {
-	Event string
-	File  string
-}
-
 func main() {
-
 	//	parse options and arguments
 	watchDir := flag.String("dir", ".", "what directory to watch")
 	portPtr := flag.Int("port", 9443, "what port to listen on")
 	flag.Parse()
 
 	//	start watcher
-	if watcherBootstrapError != nil {
-		log.Fatal(watcherBootstrapError)
+	eventsChannel := make(chan notify.EventInfo, 1)
+	if err := notify.Watch(*watchDir, eventsChannel, notify.Remove); err != nil {
+		log.Fatal(err)
 	}
-	defer func(watcher *fsnotify.Watcher) {
-		err := watcher.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(watcher)
-	watcherAddFolderError := watcher.Add(*watchDir)
-	if watcherAddFolderError != nil {
-		log.Fatal(watcherAddFolderError)
-	}
+	defer notify.Stop(eventsChannel)
 	fmt.Printf("watching folder %s\n", *watchDir)
 
-	//	start web server
-	fs := http.FileServer(http.Dir(*watchDir))
-	http.Handle("/", injectHeadersForStaticFiles(fs))
-	http.Handle(ssePath, handler(fsEventHandler))
+	//	Configure web server
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir(*watchDir))
+	mux.Handle("/", fileServer)
+
+	//	SSE Events
+	mux.Handle(ssePath, &fsEventHandler{})
+
+	//	Start Web Server
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)
-	err := http.ListenAndServeTLS(portString, "./localhost.pem", "localhost-key.pem", nil)
+	err := http.ListenAndServeTLS(portString, "./localhost.pem", "localhost-key.pem", mux)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -58,18 +47,24 @@ func main() {
 
 }
 
-func injectHeadersForStaticFiles(fs http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-store, max-age=1")
-		fs.ServeHTTP(w, r)
+type fsEventHandler struct {
+	msg notify.Event
+}
+
+func (ev *fsEventHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	for {
+		select {
+		case event := <-eventsChannel.Events:
+			pushEvent(event, w)
+			w.(http.Flusher).Flush()
+		case <-r.Context().Done():
+			//log.Panic("watcher.Events was Context().Done(). What does this mean?")
+			return
+		}
 	}
 }
 
-func handler(f http.HandlerFunc) http.Handler {
-	return f
-}
-
-func pushEvent(msg fsnotify.Event, w http.ResponseWriter) {
+func pushEvent(msg notify.EventInfo, w http.ResponseWriter) {
 	/**
 	 *	push a fileSystem Event through SSE
 	 */
@@ -82,8 +77,8 @@ func pushEvent(msg fsnotify.Event, w http.ResponseWriter) {
 	w.Header().Set("Connection", "keep-alive")
 
 	e := FsEvent{
-		File:  msg.Name,
-		Event: msg.Op.String(),
+		File:  msg.Path(),
+		Event: msg.Event().String(),
 	}
 	log.Println(msg)
 	var buf bytes.Buffer
@@ -97,20 +92,4 @@ func pushEvent(msg fsnotify.Event, w http.ResponseWriter) {
 		log.Panic(fprintf, err)
 		return
 	}
-}
-
-func fsEventHandler(w http.ResponseWriter, r *http.Request) {
-
-	//	consume fileSystem events and push them to the HTTP response one by one
-	for {
-		select {
-		case event := <-watcher.Events:
-			pushEvent(event, w)
-			w.(http.Flusher).Flush()
-		case <-r.Context().Done():
-			//log.Panic("watcher.Events was Context().Done() d. What does this mean?")
-			return
-		}
-	}
-
 }
