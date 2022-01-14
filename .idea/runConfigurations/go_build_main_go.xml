@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
-    <module name="fasthak" />
-    <working_directory value="$PROJECT_DIR$/../fasthak" />
+    <module name="dev-server" />
+    <working_directory value="$PROJECT_DIR$" />
     <parameters value="--dir=public --port=9443" />
     <kind value="FILE" />
     <package value="awesomeProject" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$/../fasthak/main.go" />
-    <output_directory value="$PROJECT_DIR$/../fasthak/build" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <output_directory value="$PROJECT_DIR$/build" />
     <method v="2" />
   </configuration>
 </component>

@@ -1,5 +1,4 @@
 *-key.pem
-.idea/*
+/.idea/**
 !/.idea/runConfigurations
 build/
-fasthak # build artefact
