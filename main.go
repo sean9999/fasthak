@@ -8,6 +8,7 @@ import (
 	"github.com/rjeczalik/notify"
 	"log"
 	"net/http"
+	"strings"
 )
 
 //	constants
@@ -27,7 +28,8 @@ func main() {
 
 	//	start watcher
 	c := make(chan notify.EventInfo, 1)
-	if err := notify.Watch("./public/...", c, notify.Remove); err != nil {
+	recursiveWatchDir := []string{*watchDir, "..."}
+	if err := notify.Watch(strings.Join(recursiveWatchDir, "/"), c, notify.Remove); err != nil {
 		log.Fatal(err)
 	}
 	defer notify.Stop(c)
@@ -49,16 +51,23 @@ func main() {
 			}
 		}
 	})
-
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)
+	/*
 	err := http.ListenAndServeTLS(portString, "./localhost.pem", "localhost-key.pem", nil)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+	*/
 
-}
+	err := http.ListenAndServe(portString, nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+}X
 
 func injectHeadersForStaticFiles(fs http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
