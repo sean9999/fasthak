@@ -5,16 +5,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/fsnotify/fsnotify"
+	"github.com/rjeczalik/notify"
 	"log"
 	"net/http"
 )
 
 //	constants
 const ssePath = "/.hak/fs/sse"
-
-//	watcher needs to be global (for now until I figure out how Go works)
-var watcher, watcherBootstrapError = fsnotify.NewWatcher()
 
 type FsEvent struct {
 	Event string
@@ -29,25 +26,30 @@ func main() {
 	flag.Parse()
 
 	//	start watcher
-	if watcherBootstrapError != nil {
-		log.Fatal(watcherBootstrapError)
+	c := make(chan notify.EventInfo, 1)
+	if err := notify.Watch("./public/...", c, notify.Remove); err != nil {
+		log.Fatal(err)
 	}
-	defer func(watcher *fsnotify.Watcher) {
-		err := watcher.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(watcher)
-	watcherAddFolderError := watcher.Add(*watchDir)
-	if watcherAddFolderError != nil {
-		log.Fatal(watcherAddFolderError)
-	}
+	defer notify.Stop(c)
 	fmt.Printf("watching folder %s\n", *watchDir)
 
 	//	start web server
 	fs := http.FileServer(http.Dir(*watchDir))
 	http.Handle("/", injectHeadersForStaticFiles(fs))
-	http.Handle(ssePath, handler(fsEventHandler))
+	http.HandleFunc(ssePath, func(w http.ResponseWriter, r *http.Request) {
+		//	consume fileSystem events and push them to the HTTP response one by one
+		for {
+			select {
+			case event := <-c:
+				pushEvent(event, w)
+				w.(http.Flusher).Flush()
+			case <-r.Context().Done():
+				//log.Panic("watcher.Events was Context().Done() d. What does this mean?")
+				return
+			}
+		}
+	})
+
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)
 	err := http.ListenAndServeTLS(portString, "./localhost.pem", "localhost-key.pem", nil)
@@ -65,25 +67,19 @@ func injectHeadersForStaticFiles(fs http.Handler) http.HandlerFunc {
 	}
 }
 
-func handler(f http.HandlerFunc) http.Handler {
-	return f
-}
-
-func pushEvent(msg fsnotify.Event, w http.ResponseWriter) {
+func pushEvent(msg notify.EventInfo, w http.ResponseWriter) {
 	/**
 	 *	push a fileSystem Event through SSE
 	 */
-
 	// @todo: maybe find a way to only call this once per connection
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-
 	e := FsEvent{
-		File:  msg.Name,
-		Event: msg.Op.String(),
+		File:  msg.Path(),
+		Event: msg.Event().String(),
 	}
 	log.Println(msg)
 	var buf bytes.Buffer
@@ -97,20 +93,4 @@ func pushEvent(msg fsnotify.Event, w http.ResponseWriter) {
 		log.Panic(fprintf, err)
 		return
 	}
-}
-
-func fsEventHandler(w http.ResponseWriter, r *http.Request) {
-
-	//	consume fileSystem events and push them to the HTTP response one by one
-	for {
-		select {
-		case event := <-watcher.Events:
-			pushEvent(event, w)
-			w.(http.Flusher).Flush()
-		case <-r.Context().Done():
-			//log.Panic("watcher.Events was Context().Done() d. What does this mean?")
-			return
-		}
-	}
-
 }

@@ -3,7 +3,7 @@
  */
 
 const hak = {
-    DEBUG: true,
+    DEBUG: false,
     PREFIX: ".hak",
     EVENT: {
         NAMESPACE: 'fs'

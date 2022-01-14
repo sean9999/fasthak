@@ -1,7 +1,4 @@
-import hak from './hak_globals.js';
-
-hak.DEBUG = true;
-hak.registerDebugNode(document.getElementById('debug'));
+import hak from './globals.js';
 
 /**
  * Attach an extra event handler to SSE
@@ -11,7 +8,6 @@ hak.registerDebugNode(document.getElementById('debug'));
  * @returns {{element: HTMLElement}}
  */
 const debug = () => {
-
     let debugText = hak.debugNode.innerText = sessionStorage.getItem('debug') || "";
     const handleSSEEvent = (ev) => {
         if (ev.data != null && ev.data !== "null") {
@@ -55,8 +51,17 @@ const main = () => {
         new EventSource(`/${hak.PREFIX}/${hak.EVENT.NAMESPACE}/sse`)
     );
     if (hak.DEBUG) {
+        hak.registerDebugNode(document.getElementById('debug'));
         debug();
         sayHello();
+        document.getElementById('clear-debug').addEventListener('click', () => {
+            clearDebugInfo();
+        });
+    } else {
+        //  remove section.debug elements from the DOM
+        Array.from(document.getElementsByClassName('debug')).forEach(el => {
+            el.remove();
+        });
     }
     sse();
 };
