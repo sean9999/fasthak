@@ -1,4 +1,6 @@
+
+##  SSL
 *-key.pem
-/.idea/**
-!/.idea/runConfigurations
+
+##  build artefacts
 build/
