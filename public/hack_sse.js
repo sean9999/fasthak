@@ -20,12 +20,13 @@ const debug = () => {
             hak.debugNode.innerText = debugText;
         }
     };
-    hak.SSE.addEventListener('fs', handleSSEEvent, {passive: true, once: true});
-    return {element: hak.debugNode};
+    hak.SSE.addEventListener('fs', handleSSEEvent, { passive: true, once: true });
+    return { element: hak.debugNode };
 };
 
 const clearDebugInfo = () => {
-    sessionStorage.setItem('debug', "");
+    //sessionStorage.setItem('debug', "");
+    sessionStorage.clear();
     hak.debugNode.innerText = "";
 };
 
@@ -40,7 +41,7 @@ const sse = () => {
             location.reload();
         }
     };
-    hak.SSE.addEventListener('fs', handleSSEEvent, {passive: true, once: true});
+    hak.SSE.addEventListener('fs', handleSSEEvent, { passive: true, once: true });
 };
 
 const sayHello = () => {
@@ -61,4 +62,12 @@ const main = () => {
     sse();
 };
 
-hak.run(main);
+hak.run(() => {
+    document.getElementById('clear-debug').addEventListener("click", ev => {
+        ev.preventDefault();
+        clearDebugInfo();
+    });
+});
+
+//hak.run(main);
+window.addEventListener("load", main);

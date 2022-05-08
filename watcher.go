@@ -1,11 +1,32 @@
 package main
 
-import "github.com/fsnotify/fsnotify"
+import (
+	"bytes"
+	"encoding/json"
+	"path/filepath"
+	"strings"
 
-//	watcher needs to be global (for now until I figure out how Go works)
-var watcher, watcherBootstrapError = fsnotify.NewWatcher()
+	"github.com/rjeczalik/notify"
+)
 
-type FsEvent struct {
+type NiceEvent struct {
 	Event string
 	File  string
+}
+
+func toNiceEvent(ei notify.EventInfo) NiceEvent {
+
+	abs, _ := filepath.Abs(*watchDir)
+
+	return NiceEvent{
+		File:  strings.TrimPrefix(ei.Path(), abs+"/"),
+		Event: ei.Event().String(),
+	}
+}
+
+func niceEventToBuffer(ne NiceEvent) (bytes.Buffer, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	err := enc.Encode(ne)
+	return buf, err
 }

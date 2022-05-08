@@ -5,11 +5,15 @@ div#debug {
 }
 
 body {
-	background-color: brown;
-	width: 70%;
+	background-color: blue;
+	width: 66%;
 	margin: 0 auto;
 }
 
-body.green {
-	background-color: aquamarine;
+.green {
+	background-color: darkgreen;
+}
+
+h4 {
+	color: red;
 }

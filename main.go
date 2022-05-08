@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fsnotify/fsnotify"
+	"github.com/rjeczalik/notify"
 )
 
 //	constants
@@ -21,6 +21,7 @@ var (
 	pubKeyMaterial []byte
 	//go:embed localhost-key.pem
 	privKeyMaterial []byte
+	c               = make(chan notify.EventInfo)
 )
 
 func init() {
@@ -33,23 +34,14 @@ func init() {
 func main() {
 
 	//	start watcher
-	if watcherBootstrapError != nil {
-		log.Fatal(watcherBootstrapError)
+
+	if err := notify.Watch(*watchDir+"/...", c, notify.All); err != nil {
+		log.Fatal(err)
 	}
-	defer func(watcher *fsnotify.Watcher) {
-		err := watcher.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(watcher)
-	watcherAddFolderError := watcher.Add(*watchDir)
-	if watcherAddFolderError != nil {
-		log.Fatal(watcherAddFolderError)
-	}
-	fmt.Printf("watching folder %s\n", *watchDir)
+	defer notify.Stop(c)
+	//defer close(c)
 
 	//	start web server
-	//cert, err := GenX509KeyPair()
 	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
 	if err != nil {
 		log.Fatalln(err)
@@ -63,6 +55,22 @@ func main() {
 	err = ListenAndServeTLSKeyPair(portString, cert, mux)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+}
+
+func fsEventHandler(w http.ResponseWriter, r *http.Request) {
+
+	//	consume fileSystem events and push them to the HTTP response one by one
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	for ei := range c {
+		pushEvent(ei, w)
 	}
 
 }
