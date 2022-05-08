@@ -1,5 +1,5 @@
 /**
- * Some globals and helper functions
+ * Some globals and helper functions. 9
  */
 
 const hak = {

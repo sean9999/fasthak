@@ -1,15 +1,15 @@
 div#debug {
-    font-family: "Cascadia Code";
-    white-space: pre-line;
-    color: navy;
+	font-family: "Cascadia Code";
+	white-space: pre-line;
+	color: navy;
 }
 
 body {
-    background-color: blanchedalmond;
-    width: 66%;
-    margin: 0 auto;
+	background-color: brown;
+	width: 70%;
+	margin: 0 auto;
 }
 
 body.green {
-    background-color: aquamarine;
+	background-color: aquamarine;
 }
