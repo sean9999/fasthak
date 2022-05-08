@@ -38,17 +38,17 @@ func toBytes(ei notify.EventInfo) []byte {
 }
 
 //	watchRecursively emits event info to the "niceEvents" channel
-func watchRecursively(path string, niceEvents chan []byte) error {
+func watchRecursively(path string, niceEvents chan NiceEvent) error {
 
 	var c = make(chan notify.EventInfo)
 	err := notify.Watch(path+"/...", c, notify.All)
 
 	//	massage the event to the format we want
 	go func() {
-		for ei := range c {
-			ne := notifyEventInfoToNiceEvent(ei)
-			log.Printf("%s - %s", ne.Event, ne.File)
-			niceEvents <- toBytes(ei)
+		for eventInfo := range c {
+			niceEvent := notifyEventInfoToNiceEvent(eventInfo)
+			log.Printf("%s - %s", niceEvent.Event, niceEvent.File)
+			niceEvents <- niceEvent
 		}
 	}()
 

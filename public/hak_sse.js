@@ -15,7 +15,7 @@ const debug = () => {
     let debugText = hak.debugNode.innerText = sessionStorage.getItem('debug') || "";
     const handleSSEEvent = (ev) => {
         if (ev.data != null && ev.data !== "null") {
-            debugText += "\n" + ev.data;
+            debugText += "\n" + JSON.stringify(atob(ev.data).split("\n"));
             sessionStorage.setItem('debug', debugText);
             hak.debugNode.innerText = debugText;
         }
@@ -43,9 +43,20 @@ const sse = () => {
     };
     hak.SSE.addEventListener('fs', handleSSEEvent, { passive: true, once: true });
 
-    hak.SSE.addEventListener("message", console.log);
-    hak.SSE.addEventListener("error", console.error);
-    hak.SSE.addEventListener("open", console.log);
+    window.addEventListener('beforeunload', event => {
+        hak.SSE.close();
+    });
+
+    hak.SSE.addEventListener("message", ev => {
+        console.info("sse message", ev.data);
+    });
+    hak.SSE.addEventListener("error", err => {
+        console.error("sse error", err);
+        main();
+    });
+    hak.SSE.addEventListener("open", ev => {
+        console.info("sse open");
+    });
 
 };
 
@@ -57,14 +68,24 @@ const sayHello = () => {
 };
 
 const main = () => {
-    hak.registerSSE(
-        new EventSource(`/${hak.PREFIX}/${hak.EVENT.NAMESPACE}/sse`)
-    );
+
     if (hak.DEBUG) {
-        debug();
         sayHello();
     }
-    sse();
+
+    const embark = () => {
+        hak.registerSSE(
+            new EventSource(`/${hak.PREFIX}/${hak.EVENT.NAMESPACE}/sse`)
+        );
+        if (hak.DEBUG) {
+            debug();
+        }
+        sse();
+    };
+
+    //  unfortunately we need to force a delay before registration
+    let iid = window.setTimeout(embark, 250);
+
 };
 
 hak.run(() => {

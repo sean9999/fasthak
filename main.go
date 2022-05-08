@@ -21,7 +21,7 @@ var (
 	privKeyMaterial []byte
 )
 
-var events = make(chan []byte)
+var niceEvents = make(chan NiceEvent)
 
 func init() {
 	//	parse options and arguments
@@ -34,14 +34,14 @@ func init() {
 func main() {
 
 	//	start watcher
-	if err := watchRecursively(*watchDir, events); err != nil {
+	if err := watchRecursively(*watchDir, niceEvents); err != nil {
 		log.Fatal(err)
 	}
 
 	//	despatch events to SSE broker
-	broker := NewServer()
+	broker := NewBroker()
 	go func() {
-		for b := range events {
+		for b := range niceEvents {
 			broker.Notifier <- b
 		}
 	}()

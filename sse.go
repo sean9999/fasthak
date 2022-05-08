@@ -1,51 +1,38 @@
-// v2 of the great example of SSE in go by @ismasan.
-// includes fixes:
-//    * infinite loop ending in panic
-//    * closing a client twice
-//    * potentially blocked listen() from closing a connection during multiplex step.
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 )
 
-// the amount of time to wait when pushing a message to
-// a slow client or a client that closed after `range clients` started.
 const patience time.Duration = time.Second * 1
 
-// Example SSE server in Golang.
-//     $ go run sse.go
-
-type Broker struct {
-
-	// Events are pushed to this channel by the main events-gathering routine
-	Notifier chan []byte
-
-	// New client connections
-	newClients chan chan []byte
-
-	// Closed client connections
-	closingClients chan chan []byte
-
-	// Client connections registry
-	clients map[chan []byte]bool
+func (ne NiceEvent) String() string {
+	dataToken := ne.Event + "\n" + ne.File
+	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
+	return fmt.Sprintf("\nevent: fs\ndata: %s\nretry: 3001\n", data)
 }
 
-func NewServer() (broker *Broker) {
-	// Instantiate a broker
+type Broker struct {
+	Notifier       chan NiceEvent
+	newClients     chan chan NiceEvent
+	closingClients chan chan NiceEvent
+	clients        map[chan NiceEvent]bool
+}
+
+func NewBroker() (broker *Broker) {
 	broker = &Broker{
-		Notifier:       make(chan []byte, 1),
-		newClients:     make(chan chan []byte),
-		closingClients: make(chan chan []byte),
-		clients:        make(map[chan []byte]bool),
+		Notifier:       make(chan NiceEvent, 1),
+		newClients:     make(chan chan NiceEvent),
+		closingClients: make(chan chan NiceEvent),
+		clients:        make(map[chan NiceEvent]bool),
 	}
 
 	// Set it running - listening and broadcasting events
 	go broker.listen()
-
 	return
 }
 
@@ -66,7 +53,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// Each connection registers its own message channel with the Broker's connections registry
-	messageChan := make(chan []byte)
+	messageChan := make(chan NiceEvent)
 
 	// Signal the broker that we have a new connection
 	broker.newClients <- messageChan
@@ -88,7 +75,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 			// Write to the ResponseWriter
 			// Server Sent Events compatible
-			fmt.Fprintf(rw, "data: %s\n\n", <-messageChan)
+			fmt.Fprintf(rw, "%s\n", <-messageChan)
 
 			// Flush the data immediatly instead of buffering it for later.
 			flusher.Flush()

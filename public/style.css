@@ -5,17 +5,17 @@ div#debug {
 }
 
 body {
-	background-color: blue;
+	background-color: bisque;
 	width: 66%;
 	margin: 0 auto;
 }
 
 .green {
-	background-color: darkgreen;
+	background-color: darkcyan;
 }
 
 h4 {
-	color: palegreen;
-	text-shadow: 0ch;
-	display: block;
+	color: palevioletred;
+	font-weight: 700;
+	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
