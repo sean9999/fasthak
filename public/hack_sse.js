@@ -42,6 +42,11 @@ const sse = () => {
         }
     };
     hak.SSE.addEventListener('fs', handleSSEEvent, { passive: true, once: true });
+
+    hak.SSE.addEventListener("message", console.log);
+    hak.SSE.addEventListener("error", console.error);
+    hak.SSE.addEventListener("open", console.log);
+
 };
 
 const sayHello = () => {

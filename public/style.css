@@ -15,5 +15,7 @@ body {
 }
 
 h4 {
-	color: red;
+	color: palegreen;
+	text-shadow: 0ch;
+	display: block;
 }
