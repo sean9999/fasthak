@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/tls"
-	_ "embed"
+	"embed"
 	"flag"
 	"fmt"
 	"log"
@@ -19,6 +19,8 @@ var (
 	pubKeyMaterial []byte
 	//go:embed localhost-key.pem
 	privKeyMaterial []byte
+	//go:embed frontend
+	frontend embed.FS
 )
 
 var niceEvents = make(chan NiceEvent)
@@ -38,11 +40,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//	despatch events to SSE broker
-	broker := NewBroker()
+	//	despatch events to SSE sseBroker
+	sseBroker := NewBroker()
 	go func() {
 		for b := range niceEvents {
-			broker.Notifier <- b
+			sseBroker.Notifier <- b
 		}
 	}()
 
@@ -54,7 +56,15 @@ func main() {
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir(*watchDir))
 	mux.Handle("/", injectHeadersForStaticFiles(fs))
-	mux.Handle(ssePath, broker)
+
+	//	.hak/**/*
+
+	//	.hak/js/
+	mux.Handle("./hak/js/", http.FileServer(frontend))
+
+	//	./hak/fs/sse
+	mux.Handle(ssePath, sseBroker)
+
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)
 	err = ListenAndServeTLSKeyPair(portString, cert, mux)
