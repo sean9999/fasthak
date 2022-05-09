@@ -1,5 +1,9 @@
+##	SSL
 *-key.pem
-.idea/*
-!/.idea/runConfigurations
+
+##	build artefacts
 build/
-fasthak # build artefact
+
+##	IDE
+.vscode/
+.idea/

@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+
+div#debug {
+	font-family: 'Fira Code', monospace;
+	white-space: pre-line;
+	color: navy;
+}
+
+body.fouc {
+	transform: rotate(1deg);
+}
+
+main {
+	border: 1px dotted rgba(0,0,0,0.5);
+}

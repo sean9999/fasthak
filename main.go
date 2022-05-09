@@ -1,95 +1,84 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"crypto/tls"
+	"embed"
 	"flag"
 	"fmt"
-
-	"github.com/rjeczalik/notify"
+	"io/fs"
 	"log"
 	"net/http"
+	"path"
 )
 
 //	constants
-const ssePath = "/.hak/fs/sse"
+const hakPrefix = "/.hak"
+const ssePath = "fs/sse"
+
+var (
+	watchDir *string
+	portPtr  *int
+	//go:embed localhost.pem
+	pubKeyMaterial []byte
+	//go:embed localhost-key.pem
+	privKeyMaterial []byte
+	//go:embed frontend/*
+	frontend embed.FS
+)
+
+var niceEvents = make(chan NiceEvent)
+
+func init() {
+	//	parse options and arguments
+	//	@todo: sanity checking
+	watchDir = flag.String("dir", ".", "what directory to watch")
+	portPtr = flag.Int("port", 9443, "what port to listen on")
+	flag.Parse()
+}
+
+func hakHandler() http.Handler {
+	fsys := fs.FS(frontend)
+	hakFiles, _ := fs.Sub(fsys, "frontend")
+	return http.StripPrefix(hakPrefix+"/js/", http.FileServer(http.FS(hakFiles)))
+}
 
 func main() {
-	//	parse options and arguments
-	watchDir := flag.String("dir", ".", "what directory to watch")
-	portPtr := flag.Int("port", 9443, "what port to listen on")
-	flag.Parse()
 
 	//	start watcher
-	eventsChannel := make(chan notify.EventInfo, 1)
-	if err := notify.Watch(*watchDir, eventsChannel, notify.Remove); err != nil {
+	if err := watchRecursively(*watchDir, niceEvents); err != nil {
 		log.Fatal(err)
 	}
-	defer notify.Stop(eventsChannel)
-	fmt.Printf("watching folder %s\n", *watchDir)
 
-	//	Configure web server
+	//	dispatch events to SSE sseBroker
+	sseBroker := NewBroker()
+	go func() {
+		for b := range niceEvents {
+			sseBroker.Notifier <- b
+		}
+	}()
+
+	//	start web server
+	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir(*watchDir))
-	mux.Handle("/", fileServer)
 
-	//	SSE Events
-	mux.Handle(ssePath, &fsEventHandler{})
+	//	static files
+	staticFileServer := http.FileServer(http.Dir(*watchDir))
+	mux.Handle("/", injectHeadersForStaticFiles(staticFileServer))
 
-	//	Start Web Server
+	//	.hak/js/*
+	mux.Handle(hakPrefix+"/js/", hakHandler())
+
+	//	./hak/fs/sse
+	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
+
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)
-	err := http.ListenAndServeTLS(portString, "./localhost.pem", "localhost-key.pem", mux)
+	err = ListenAndServeTLSKeyPair(portString, cert, mux)
 	if err != nil {
-		log.Fatal(err)
-		return
+		log.Fatalln(err)
 	}
 
-}
-
-type fsEventHandler struct {
-	msg notify.Event
-}
-
-func (ev *fsEventHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for {
-		select {
-		case event := <-eventsChannel.Events:
-			pushEvent(event, w)
-			w.(http.Flusher).Flush()
-		case <-r.Context().Done():
-			//log.Panic("watcher.Events was Context().Done(). What does this mean?")
-			return
-		}
-	}
-}
-
-func pushEvent(msg notify.EventInfo, w http.ResponseWriter) {
-	/**
-	 *	push a fileSystem Event through SSE
-	 */
-
-	// @todo: maybe find a way to only call this once per connection
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-
-	e := FsEvent{
-		File:  msg.Path(),
-		Event: msg.Event().String(),
-	}
-	log.Println(msg)
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	err := enc.Encode(e)
-	if err != nil {
-		return
-	}
-	fprintf, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", "fs", buf.String())
-	if err != nil {
-		log.Panic(fprintf, err)
-		return
-	}
 }
