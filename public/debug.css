@@ -1,18 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+
 div#debug {
-	font-family: "Cascadia Code";
+	font-family: 'Fira Code', monospace;
 	white-space: pre-line;
 	color: navy;
 }
 
 body.fouc {
-	background-color: black;
-	opacity: 0.5;
-}
-
-body.fouc h1 {
-	color: white;
+	transform: rotate(1deg);
 }
 
 main {
-	border: 1px dotted navy;
+	border: 1px dotted rgba(0,0,0,0.5);
 }
