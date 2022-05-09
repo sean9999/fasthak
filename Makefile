@@ -1,9 +1,17 @@
 BUILD_FOLDER=build
 BINARY_NAME=fasthak
 BIN_FOLDER=/usr/local/bin
+REPO=github.com/sean9999/fasthak
+SEMVER := $$(git tag --sort=-version:refname | head -n 1)
 
 build:
 	./build.sh
+
+docker-build:
+	docker build -t ${REPO}:${SEMVER} .
+
+docker-run:
+	docker run -p 9001:9001 ${REPO}:${SEMVER}
 
 run:
 	./run.sh

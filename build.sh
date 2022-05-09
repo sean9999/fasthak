@@ -6,6 +6,7 @@ SEMVER="$(git tag --sort=-version:refname | head -n 1)"
 #	should create localhost.pem and locahost-key.pem
 #	the build will fail if those files don't exist.
 #	@see: https://github.com/FiloSottile/mkcert#readme
+
 #	mkcert -ecdsa localhost
 
 #	build the binary
