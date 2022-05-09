@@ -13,7 +13,7 @@ const patience time.Duration = time.Second * 1
 func (ne NiceEvent) String() string {
 	dataToken := ne.Event + "\n" + ne.File
 	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
-	return fmt.Sprintf("\nevent: fs\ndata: %s\nretry: 3001\n", data)
+	return fmt.Sprintf("event: fs\ndata: %s\nretry: 3001\n\n", data)
 }
 
 type Broker struct {
@@ -75,7 +75,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 			// Write to the ResponseWriter
 			// Server Sent Events compatible
-			fmt.Fprintf(rw, "%s\n", <-messageChan)
+			fmt.Fprintf(rw, "%s", <-messageChan)
 
 			// Flush the data immediatly instead of buffering it for later.
 			flusher.Flush()

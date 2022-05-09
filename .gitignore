@@ -1,6 +1,9 @@
-
-##  SSL
+##	SSL
 *-key.pem
 
-##  build artefacts
+##	build artefacts
 build/
+
+##	IDE
+.vscode/
+.idea/

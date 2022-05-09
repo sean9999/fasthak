@@ -8,13 +8,9 @@ import hak from './hak.js';
 const EVENT_NAMESPACE = "fs";
 
 const registerSSE = async () => {
-	try {
-		const sse = new EventSource(`/${hak.PREFIX}/${EVENT_NAMESPACE}/sse`);
-		hak.sse = sse;
-		return sse;
-	} finally {
-		return null;
-	}
+	const sse = new EventSource(`/${hak.PREFIX}/${EVENT_NAMESPACE}/sse`);
+	hak.sse = sse;
+	return sse;
 };
 
 export { hak, registerSSE };

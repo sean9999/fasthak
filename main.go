@@ -5,12 +5,15 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
+	"path"
 )
 
 //	constants
-const ssePath = "/.hak/fs/sse"
+const hakPrefix = "/.hak"
+const ssePath = "fs/sse"
 
 var (
 	watchDir *string
@@ -19,7 +22,7 @@ var (
 	pubKeyMaterial []byte
 	//go:embed localhost-key.pem
 	privKeyMaterial []byte
-	//go:embed frontend
+	//go:embed frontend/*
 	frontend embed.FS
 )
 
@@ -33,6 +36,12 @@ func init() {
 	flag.Parse()
 }
 
+func hakHandler() http.Handler {
+	fsys := fs.FS(frontend)
+	hakFiles, _ := fs.Sub(fsys, "frontend")
+	return http.StripPrefix(hakPrefix+"/js/", http.FileServer(http.FS(hakFiles)))
+}
+
 func main() {
 
 	//	start watcher
@@ -40,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//	despatch events to SSE sseBroker
+	//	dispatch events to SSE sseBroker
 	sseBroker := NewBroker()
 	go func() {
 		for b := range niceEvents {
@@ -54,16 +63,16 @@ func main() {
 		log.Fatalln(err)
 	}
 	mux := http.NewServeMux()
-	fs := http.FileServer(http.Dir(*watchDir))
-	mux.Handle("/", injectHeadersForStaticFiles(fs))
 
-	//	.hak/**/*
+	//	static files
+	staticFileServer := http.FileServer(http.Dir(*watchDir))
+	mux.Handle("/", injectHeadersForStaticFiles(staticFileServer))
 
-	//	.hak/js/
-	mux.Handle("./hak/js/", http.FileServer(frontend))
+	//	.hak/js/*
+	mux.Handle(hakPrefix+"/js/", hakHandler())
 
 	//	./hak/fs/sse
-	mux.Handle(ssePath, sseBroker)
+	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("listening on port %d\n", *portPtr)

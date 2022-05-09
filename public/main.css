@@ -1,0 +1,18 @@
+body {
+	background-color: bisque;
+	width: 66%;
+	margin: 0 auto;
+}
+
+img.hero {
+	width: 100%;
+}
+
+nav {
+	margin: 0 auto;
+	text-align: center;
+}
+
+nav a {
+	margin: 0 0.25em;
+}

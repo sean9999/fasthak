@@ -1,21 +1,2 @@
-div#debug {
-	font-family: "Cascadia Code";
-	white-space: pre-line;
-	color: navy;
-}
-
-body {
-	background-color: bisque;
-	width: 66%;
-	margin: 0 auto;
-}
-
-.green {
-	background-color: darkcyan;
-}
-
-h4 {
-	color: palevioletred;
-	font-weight: 700;
-	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
+@import url("main.css");
+@import url("debug.css");

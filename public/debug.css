@@ -1,0 +1,18 @@
+div#debug {
+	font-family: "Cascadia Code";
+	white-space: pre-line;
+	color: navy;
+}
+
+body.fouc {
+	background-color: black;
+	opacity: 0.5;
+}
+
+body.fouc h1 {
+	color: white;
+}
+
+main {
+	border: 1px dotted navy;
+}
