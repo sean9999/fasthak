@@ -1,3 +1,16 @@
-body {
-	background-color: bisque;
+header, footer {
+	background-color: #201940;
+	color: white;
+}
+
+
+header a,
+footer a {
+	color: cyan;
+}
+
+header a:hover,
+footer a:hover {
+	color: white;
+	text-decoration: dashed;
 }

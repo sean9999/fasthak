@@ -10,6 +10,19 @@ body.fouc {
 	transform: rotate(1deg);
 }
 
+body>header,
+body>main,
+body>footer {
+	border-width: 1px;
+	border-style: dashed;
+}
+
+header,
+footer {
+	border-color: gray;
+	background-color: #201940;
+}
+
 main {
-	border: 1px dotted rgba(0,0,0,0.5);
+	border-color: purple;
 }
