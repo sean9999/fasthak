@@ -3,10 +3,13 @@ BINARY_NAME=fasthak
 BIN_FOLDER=/usr/local/bin
 
 build:
-	go build -o ${BUILD_FOLDER}/
+	./build.sh
 
 run:
-	go run *.go --dir=public --port=9443 
+	./run.sh
+
+tidy:
+	go mod tidy
 
 vendor:
 	go mod vendor
