@@ -18,7 +18,7 @@ The client-side code is available at `https://localhost:9443/.hak/js/`. You do n
 
 SSE makes more sense than websockets, which is what traditional live-reloaders use. First off, the information does not need to be two-way. Your app has nothing to say to the server. Your server has much to say to your app. The duplex connection that websockets provide are overkill and wasted resources. Fasthak is therefore more correct and more efficient than LiveReload.
 
-Secondly, fasthak provides filesystem events as Javascript Events. You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [<abbr title="Hot Module Replacement">HMR</abbr](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986). By contrast, LiveReload bakes in the assumption that the only way you'll want to respond to filesystem events is to reload.
+Secondly, fasthak provides filesystem events as Javascript Events. You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986). By contrast, LiveReload bakes in the assumption that the only way you'll want to respond to filesystem events is to reload.
 
 ## Should I switch from LiveReload?
 
