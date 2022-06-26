@@ -6,25 +6,26 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"path"
 )
 
-//	constants
 const hakPrefix = "/.hak"
 const ssePath = "fs/sse"
 
 var (
 	watchDir *string
 	portPtr  *int
-	//go:embed localhost.pem
-	pubKeyMaterial []byte
-	//go:embed localhost-key.pem
-	privKeyMaterial []byte
 	//go:embed frontend/*
 	frontend embed.FS
 )
+
+type NiceEvent struct {
+	Event string
+	File  string
+}
 
 var niceEvents = make(chan NiceEvent)
 
@@ -56,6 +57,16 @@ func main() {
 			sseBroker.Notifier <- b
 		}
 	}()
+
+	//	get TLS keys. panic if they don't exist
+	pubKeyMaterial, err := ioutil.ReadFile("localhost.pem")
+	if err != nil {
+		panic("Could not find localhost.pem")
+	}
+	privKeyMaterial, err := ioutil.ReadFile("localhost-key.pem")
+	if err != nil {
+		panic("Could not find localhost-key.pem")
+	}
 
 	//	start web server
 	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)

@@ -39,9 +39,7 @@ func NewBroker() (broker *Broker) {
 func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	// Make sure that the writer supports flushing.
-	//
 	flusher, ok := rw.(http.Flusher)
-
 	if !ok {
 		http.Error(rw, "Streaming unsupported!", http.StatusInternalServerError)
 		return

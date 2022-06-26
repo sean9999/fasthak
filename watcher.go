@@ -10,11 +10,6 @@ import (
 	"github.com/rjeczalik/notify"
 )
 
-type NiceEvent struct {
-	Event string
-	File  string
-}
-
 func notifyEventInfoToNiceEvent(ei notify.EventInfo) NiceEvent {
 	abs, _ := filepath.Abs(*watchDir)
 	return NiceEvent{

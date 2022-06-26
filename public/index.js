@@ -1,4 +1,4 @@
-import { hak, registerSSE } from "./.hak/js/sse.js";
+import { hak, registerSSE } from "/.hak/js/sse.js";
 
 /**
  * A flash that serves as a visual indicator that the page just reloaded

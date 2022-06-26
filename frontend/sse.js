@@ -5,12 +5,17 @@ import hak from './hak.js';
  * This allows you to implement live-reloading logic
  */
 
-const EVENT_NAMESPACE = "fs";
+hak.DEBUG = true;
 
 const registerSSE = async () => {
-	const sse = new EventSource(`/${hak.PREFIX}/${EVENT_NAMESPACE}/sse`);
-	hak.sse = sse;
-	return sse;
+	try {
+		const sse = new EventSource(`/${hak.PREFIX}/fs/sse`);
+		hak.sse = sse;
+		return sse;
+	} catch (e) {
+		console.error('caught failed registerSSE', e);
+	}
+
 };
 
 export { hak, registerSSE };
