@@ -30,4 +30,8 @@ Due to it's design, FastHak could easily be extended to respond to events other 
 
 Additionally, it would be useful to provide hooks for common frameworks, such as React and Vue.
 
-Finally, I would like to have a `fasthak init` command that automatically generates the minimal scaffolding needed of your static sites, and possibly generates certs too, freeing you from having to use mkcert. 
+Furthermore, I would like to have a `fasthak init` command that automatically generates the minimal scaffolding needed of your static sites, and possibly generates certs too, freeing you from having to wrestle with mkcert.
+
+Finally, the client code should be available as a browser extension, so that it's injected into the page but not a part of your codebase.
+
+These are all things I'll get to, given time.
