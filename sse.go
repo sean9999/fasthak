@@ -10,6 +10,7 @@ import (
 
 const patience time.Duration = time.Second * 1
 
+//	serializer for NiceEvent
 func (ne NiceEvent) String() string {
 	dataToken := ne.Event + "\n" + ne.File
 	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
@@ -63,19 +64,16 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}()
 
 	// Listen to connection close and un-register messageChan
-	notify := rw.(http.CloseNotifier).CloseNotify()
+	ctx := req.Context()
 
 	for {
 		select {
-		case <-notify:
+		case <-ctx.Done():
 			return
 		default:
-
-			// Write to the ResponseWriter
-			// Server Sent Events compatible
+			// send SSE data
 			fmt.Fprintf(rw, "%s", <-messageChan)
-
-			// Flush the data immediatly instead of buffering it for later.
+			// Flush to user-agent
 			flusher.Flush()
 		}
 	}
@@ -104,6 +102,7 @@ func (broker *Broker) listen() {
 			for clientMessageChan := range broker.clients {
 				select {
 				case clientMessageChan <- event:
+					log.Print("sse event")
 				case <-time.After(patience):
 					log.Print("Skipping client.")
 				}

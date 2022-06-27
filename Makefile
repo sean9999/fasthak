@@ -11,7 +11,7 @@ docker-build:
 	docker build -t ${REPO}:${SEMVER} .
 
 docker-run:
-	docker run -p 9001:9001 ${REPO}:${SEMVER}
+	docker run -p 9001:9001 -v $${PWD}/public:/srv/public ${REPO}:${SEMVER}
 
 run:
 	./run.sh
