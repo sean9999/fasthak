@@ -3,13 +3,28 @@
 div#debug {
 	font-family: 'Fira Code', monospace;
 	white-space: pre-line;
-	color: navy;
+	color: black;
+	font-size: 10pt;
+}
+
+div#debug li {
+	list-style-type: none;
+}
+
+div#debug section h3 {
+	margin-bottom: 0;
+}
+
+div#debug section ul {
+	margin-top: 0;
 }
 
 body.fouc {
 	transform: rotate(1deg);
 }
 
+/*
 main {
 	border: 1px dotted rgba(0,0,0,0.5);
 }
+*/
