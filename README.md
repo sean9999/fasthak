@@ -1,4 +1,4 @@
-<img src="fast_hak.png" alt="FastHak" title="FastHak" />
+<img style="opacity: 0.75" src="fast_hak.png" alt="FastHak" title="FastHak" />
 
 FastHak is a web server written in Go designed for rapid front-end development. It uses Server Sent Events for live-reload, and automatically injects the necessary javascript files, allowing you to get straight to developing your awesome web app.
 
@@ -14,11 +14,65 @@ Which will serve your app on `https://localhost:9443`.
 
 The client-side code is available at `https://localhost:9443/.hak/js/`. You do not need to include these files in your project. They are embedded in the server itself. But you will want to point to them _from_ your project.
 
+
 ## Why Server Sent Events?
 
 SSE makes more sense than websockets, which is what traditional live-reloaders use. First off, the information does not need to be two-way. Your app has nothing to say to the server. Your server has much to say to your app. The duplex connection that websockets provide are overkill and wasted resources. Fasthak is therefore more correct and more efficient than LiveReload.
 
 Secondly, fasthak provides filesystem events as Javascript Events. You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986). LiveReload has some degree of this (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
+
+## Bare Minimum front-end Code
+
+The _bare_ minimum to see it in action would be to have one `index.html` file that looked like this:
+
+> index.html
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <script defer>
+            const sse = new EventSource(`/.hak/fs/sse`);
+            sse.addEventListener('fs', (event) => {
+
+                const payload = event.data;
+                console.log(payload);
+
+            });
+        </script>
+    </head>
+    <body>
+        <p>open console and have a look see</p>
+    </body>
+</html>
+```
+
+But since fasthak provides some convenience functions out the box, you may as well take advantage:
+
+> index.js
+```js
+import { hak, registerSSE } from "./.hak/js/sse.js";
+
+registerSSE().then(sse => {
+    sse.addEventListener('fs', (event) => {
+
+        const payload = event.data;
+        console.log(payload);
+    
+    }); 
+});
+```
+> index.html
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <script defer src="./index.js"></script>
+    </head>
+    <body>
+        <p>open console and have a look see</p>
+    </body>
+</html>
+```
 
 ## Should I switch from LiveReload?
 
@@ -34,4 +88,4 @@ Furthermore, I would like to have a `fasthak init` command that automatically ge
 
 Finally, the client code should be available as a browser extension, so that it's injected into the page but not a part of your codebase.
 
-These are all things I'll get to, given time.
+See [issues](https://github.com/sean9999/fasthak/issues) for more.

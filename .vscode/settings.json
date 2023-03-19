@@ -6,5 +6,31 @@
 		"**/.hg/store/**": true,
 		".flatpak/**": true,
 		"_build/**": true
-	}
+	},
+	"cSpell.ignoreWords": [
+		"Inotify",
+		"fsys"
+	],
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#14028b",
+        "activityBar.activeBorder": "#2f7c47",
+        "activityBar.background": "#00000000",
+        "activityBar.foreground": "#ffffff99",
+        "activityBar.inactiveForeground": "#ffffff66",
+        "activityBarBadge.background": "#422c74",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "statusBar.background": "#ff770099",
+        "statusBar.foreground": "#ffffff99",
+        "statusBarItem.hoverBackground": "#ffffff",
+        "titleBar.activeBackground": "#35e96e",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#21573299",
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "sash.hoverBorder": "#2f7c47",
+        "statusBarItem.remoteBackground": "#14028b",
+        "statusBarItem.remoteForeground": "#ffffff99",
+        "commandCenter.border": "#e7e7e799",
+        "scrollbarSlider.activeBackground": "#ff770099",
+        "editor.hoverHighlightBackground": "#ff770099"
+    }	
 }

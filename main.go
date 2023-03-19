@@ -9,9 +9,11 @@ import (
 	"log"
 	"net/http"
 	"path"
+
+	"github.com/sean9999/rebouncer"
 )
 
-//	constants
+// constants
 const hakPrefix = "/.hak"
 const ssePath = "fs/sse"
 
@@ -25,8 +27,6 @@ var (
 	//go:embed frontend/*
 	frontend embed.FS
 )
-
-var niceEvents = make(chan NiceEvent)
 
 func init() {
 	//	parse options and arguments
@@ -44,10 +44,8 @@ func hakHandler() http.Handler {
 
 func main() {
 
-	//	start watcher
-	if err := watchRecursively(*watchDir, niceEvents); err != nil {
-		log.Fatal(err)
-	}
+	stateMachine := rebouncer.NewInotify(*watchDir, 1000)
+	niceEvents := stateMachine.Subscribe()
 
 	//	dispatch events to SSE sseBroker
 	sseBroker := NewBroker()
