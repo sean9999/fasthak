@@ -5,7 +5,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"path"
@@ -34,12 +33,6 @@ func init() {
 	privkey = flag.String("privkey", "./localhost-key.pem", "private key in PEM format")
 	pubkey = flag.String("pubkey", "./localhost.pem", "public key in PEM format")
 	flag.Parse()
-}
-
-func hakHandler() http.Handler {
-	fsys := fs.FS(frontend)
-	hakFiles, _ := fs.Sub(fsys, "frontend")
-	return http.StripPrefix(hakPrefix+"/js/", http.FileServer(http.FS(hakFiles)))
 }
 
 func main() {

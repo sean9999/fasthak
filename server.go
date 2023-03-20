@@ -97,7 +97,7 @@ func serve(staticDir string, port int, privKeyPath string, pubKeyPath string, br
 
 }
 
-//	embedded client-side /.hak/js/*
+// embedded client-side /.hak/js/*
 func hakHandler() http.Handler {
 	fsys := fs.FS(frontend)
 	hakFiles, _ := fs.Sub(fsys, "frontend")
