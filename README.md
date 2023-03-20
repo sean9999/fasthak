@@ -1,5 +1,14 @@
 <img style="opacity: 0.75" src="fast_hak.png" alt="FastHak" title="FastHak" />
 
+
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/sean9999/fasthak/graphs/commit-activity)
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/sean9999/fasthak.svg)](https://pkg.go.dev/github.com/sean9999/fasthak)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/sean9999/fasthak)](https://goreportcard.com/report/github.com/sean9999/fasthak)
+
+[![Go version](https://img.shields.io/github/go-mod/go-version/sean9999/fasthak.svg)](https://github.com/sean9999/fasthak)
+
 FastHak is a web server written in Go designed for rapid front-end development. It uses Server Sent Events for live-reload, and automatically injects the necessary javascript files, allowing you to get straight to developing your awesome web app.
 
 It is designed to serve on localhost using HTTPS, because modern web-apps need HTTPS to [do](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sending_events_from_the_server) [awesome](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API#specifications) [stuff](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API). You need to provide your own certs. I recommend [mkcert](https://github.com/FiloSottile/mkcert#readme).
@@ -122,7 +131,7 @@ registerSSE().then(sse => {
 
 SSE makes more sense than websockets, which is what traditional live-reloaders use. First off, the information does not need to be two-way. Your app has nothing to say to the server. Your server has much to say to your app. The duplex connection that websockets provide are overkill and wasted resources. Fasthak is therefore more correct and more efficient than LiveReload.
 
-Secondly, fasthak provides filesystem events as [Javascript/DOM Custom Events](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986), or some other action that only you can anticipate. LiveReload has some degree of HMR (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
+Secondly, fasthak provides filesystem events as [DOM Custom Events](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986), or some other action that only you can anticipate. LiveReload has some degree of HMR (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
 
 
 ## Should I switch from LiveReload?
