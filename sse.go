@@ -76,11 +76,10 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 			// Write to the ResponseWriter
 			// Server Sent Events compatible
-
 			stringifiedEvent := StringifyEvent(<-messageChan)
 			fmt.Fprintf(rw, "%s", stringifiedEvent)
 
-			// Flush data immediately
+			// Flush data immediately to user agent
 			flusher.Flush()
 		}
 	}

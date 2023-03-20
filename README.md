@@ -4,26 +4,50 @@ FastHak is a web server written in Go designed for rapid front-end development. 
 
 It is designed to serve on localhost using HTTPS, because modern web-apps need HTTPS to [do](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sending_events_from_the_server) [awesome](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API#specifications) [stuff](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API). You need to provide your own certs. I recommend [mkcert](https://github.com/FiloSottile/mkcert#readme).
 
-FastHak is a small binary you can drop directly in your project root and invoke like so:
+
+## Getting Started
+
+Install and run [mkcert](https://github.com/FiloSottile/mkcert), which will drop a localhost.pem and localhost-key.pem in your current directory. You should make sure you understand the [ramifications](https://github.com/FiloSottile/mkcert#installation) of what mkcert does.
+
+Install the certs
+
+```shell
+$ mkcert
+```
+
+Install fasthak:
+
+```shell
+go install github.com/sean9999/fasthak@latest
+```
+
+assuming you want to start your server against the ./public subdirectory:
 
 ```
-$ fasthak -dir=public --port=9443
+$ fasthak -dir=./public
 ```
 
-Which will serve your app on `https://localhost:9443`.
+which is the equivalent of:
 
-The client-side code is available at `https://localhost:9443/.hak/js/`. You do not need to include these files in your project. They are embedded in the server itself. But you will want to point to them _from_ your project.
+```
+$ fasthak \
+    -pubkey=./localhost.pem \
+    -privkey=./localhost-key.pem \
+    -dir=./public \
+    -port=9443
+```
 
+It will serve your app on `https://localhost:9443`, as you might expect. You'll want to at least have an `index.html` there.
 
-## Why Server Sent Events?
+The client-side code is available at `https://localhost:9443/.hak/js/`. You do not need to include these files in your project. They are embedded in the server itself. You will want to point to them _from_ your project. Example:
 
-SSE makes more sense than websockets, which is what traditional live-reloaders use. First off, the information does not need to be two-way. Your app has nothing to say to the server. Your server has much to say to your app. The duplex connection that websockets provide are overkill and wasted resources. Fasthak is therefore more correct and more efficient than LiveReload.
-
-Secondly, fasthak provides filesystem events as Javascript Events. You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986). LiveReload has some degree of this (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
+```js
+import { hak, registerSSE } from "./.hak/js/sse.js";
+```
 
 ## Bare Minimum front-end Code
 
-The _bare_ minimum to see it in action would be to have one `index.html` file that looked like this:
+The _bare_ bare minimum to see it in action would be to have one `index.html` file that looked like this:
 
 > index.html
 ```html
@@ -74,9 +98,40 @@ registerSSE().then(sse => {
 </html>
 ```
 
+Of course, that only registers the events. You must choose what to do in response. Here's what I do. It's the simplest live-reloader I can think of:
+
+> index.js
+```js
+registerSSE().then(sse => {
+    sse.addEventListener('fs', (event) => {
+
+        //  close the channel
+        //  not strictly necessary, but polite
+        sse.close();
+
+        //  reload browser window
+        //  sse will reconnect on DOMContentLoaded
+        window.location.reload();
+    
+    }); 
+});
+
+```
+
+## Why Server Sent Events?
+
+SSE makes more sense than websockets, which is what traditional live-reloaders use. First off, the information does not need to be two-way. Your app has nothing to say to the server. Your server has much to say to your app. The duplex connection that websockets provide are overkill and wasted resources. Fasthak is therefore more correct and more efficient than LiveReload.
+
+Secondly, fasthak provides filesystem events as [Javascript/DOM Custom Events](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986), or some other action that only you can anticipate. LiveReload has some degree of HMR (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
+
+
 ## Should I switch from LiveReload?
 
 Meh, probably not, if you can't easily see how it would improve your workflow. This is a very niche improvement, since performance optimisation rarely matters in development mode. For me, FastHak was mainly an excuse to write a server in Go. That said, I use it all the time for net new web projects, like [my blog](https://www.seanmacdonald.ca).
+
+## How does it work
+
+[Rebouncer](https://github.com/sean9999/rebouncer) does all the heavy-lifting. Fasthak simply wraps a static server around it.
 
 ## What's Next?
 
