@@ -1,7 +1,10 @@
 module fasthak
 
-go 1.17
+go 1.20
 
-require github.com/rjeczalik/notify v0.9.2
+require github.com/sean9999/rebouncer v0.0.5
 
-require golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
+require (
+	github.com/rjeczalik/notify v0.9.3 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+)

@@ -9,30 +9,30 @@ import (
 	"log"
 	"net/http"
 	"path"
+
+	"github.com/sean9999/rebouncer"
 )
 
-//	constants
+// constants
 const hakPrefix = "/.hak"
 const ssePath = "fs/sse"
 
 var (
 	watchDir *string
 	portPtr  *int
-	//go:embed localhost.pem
-	pubKeyMaterial []byte
-	//go:embed localhost-key.pem
-	privKeyMaterial []byte
+	privkey  *string
+	pubkey   *string
 	//go:embed frontend/*
 	frontend embed.FS
 )
-
-var niceEvents = make(chan NiceEvent)
 
 func init() {
 	//	parse options and arguments
 	//	@todo: sanity checking
 	watchDir = flag.String("dir", ".", "what directory to watch")
 	portPtr = flag.Int("port", 9443, "what port to listen on")
+	privkey = flag.String("privkey", "./localhost-key.pem", "private key in PEM format")
+	pubkey = flag.String("pubkey", "./localhost.pem", "public key in PEM format")
 	flag.Parse()
 }
 
@@ -44,10 +44,14 @@ func hakHandler() http.Handler {
 
 func main() {
 
-	//	start watcher
-	if err := watchRecursively(*watchDir, niceEvents); err != nil {
+	//	load up privkey and pubkey
+	cert, err := tls.LoadX509KeyPair(*pubkey, *privkey)
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	stateMachine := rebouncer.NewInotify(*watchDir, 1000)
+	niceEvents := stateMachine.Subscribe()
 
 	//	dispatch events to SSE sseBroker
 	sseBroker := NewBroker()
@@ -58,7 +62,6 @@ func main() {
 	}()
 
 	//	start web server
-	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
 	if err != nil {
 		log.Fatalln(err)
 	}
