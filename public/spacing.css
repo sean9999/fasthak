@@ -1,0 +1,30 @@
+figure#logo {
+	padding: 1em;
+}
+
+
+#logo img {
+	max-width: 220px;
+	max-height: 150px;
+}
+
+
+figcaption {
+	background-color: inherit;
+	color: #fff;
+	font: italic smaller sans-serif;
+	padding: 3px;
+	text-align: center;
+}
+
+body>header>nav>a {
+	display: block;
+}
+
+header>.carbon.ad {
+	margin-bottom: 0;
+}
+
+header>.carbon.ad>img {
+	width: 100%;
+}
