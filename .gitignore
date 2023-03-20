@@ -1,5 +1,5 @@
 ##	SSL
-*-key.pem
+*.pem
 
 ##	build artefacts
 build/
@@ -7,3 +7,6 @@ build/
 ##	IDE
 .vscode/
 .idea/
+
+##	CI/CD
+publish.sh

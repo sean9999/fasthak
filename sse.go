@@ -6,30 +6,31 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/sean9999/rebouncer"
 )
 
 const patience time.Duration = time.Second * 1
 
-//	serializer for NiceEvent
-func (ne NiceEvent) String() string {
-	dataToken := ne.Event + "\n" + ne.File
+func StringifyEvent(ne rebouncer.NiceEvent) string {
+	dataToken := ne.Operation + "\n" + ne.File
 	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
-	return fmt.Sprintf("event: fs\ndata: %s\nretry: 3001\n\n", data)
+	return fmt.Sprintf("id: %d\nevent: fs\ndata: %s\nretry: 3001\n\n", ne.Id, data)
 }
 
 type Broker struct {
-	Notifier       chan NiceEvent
-	newClients     chan chan NiceEvent
-	closingClients chan chan NiceEvent
-	clients        map[chan NiceEvent]bool
+	Notifier       chan rebouncer.NiceEvent
+	newClients     chan chan rebouncer.NiceEvent
+	closingClients chan chan rebouncer.NiceEvent
+	clients        map[chan rebouncer.NiceEvent]bool
 }
 
 func NewBroker() (broker *Broker) {
 	broker = &Broker{
-		Notifier:       make(chan NiceEvent, 1),
-		newClients:     make(chan chan NiceEvent),
-		closingClients: make(chan chan NiceEvent),
-		clients:        make(map[chan NiceEvent]bool),
+		Notifier:       make(chan rebouncer.NiceEvent, 1),
+		newClients:     make(chan chan rebouncer.NiceEvent),
+		closingClients: make(chan chan rebouncer.NiceEvent),
+		clients:        make(map[chan rebouncer.NiceEvent]bool),
 	}
 
 	// Set it running - listening and broadcasting events
@@ -41,6 +42,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	// Make sure that the writer supports flushing.
 	flusher, ok := rw.(http.Flusher)
+
 	if !ok {
 		http.Error(rw, "Streaming unsupported!", http.StatusInternalServerError)
 		return
@@ -52,7 +54,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// Each connection registers its own message channel with the Broker's connections registry
-	messageChan := make(chan NiceEvent)
+	messageChan := make(chan rebouncer.NiceEvent)
 
 	// Signal the broker that we have a new connection
 	broker.newClients <- messageChan
@@ -64,16 +66,20 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}()
 
 	// Listen to connection close and un-register messageChan
-	ctx := req.Context()
+	notify := req.Context().Done()
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-notify:
 			return
 		default:
-			// send SSE data
-			fmt.Fprintf(rw, "%s", <-messageChan)
-			// Flush to user-agent
+
+			// Write to the ResponseWriter
+			// Server Sent Events compatible
+			stringifiedEvent := StringifyEvent(<-messageChan)
+			fmt.Fprintf(rw, "%s", stringifiedEvent)
+
+			// Flush data immediately to user agent
 			flusher.Flush()
 		}
 	}
@@ -91,7 +97,7 @@ func (broker *Broker) listen() {
 			log.Printf("Client added. %d registered clients", len(broker.clients))
 		case s := <-broker.closingClients:
 
-			// A client has dettached and we want to
+			// A client has detached and we want to
 			// stop sending them messages.
 			delete(broker.clients, s)
 			log.Printf("Removed client. %d registered clients", len(broker.clients))
@@ -102,7 +108,6 @@ func (broker *Broker) listen() {
 			for clientMessageChan := range broker.clients {
 				select {
 				case clientMessageChan <- event:
-					log.Print("sse event")
 				case <-time.After(patience):
 					log.Print("Skipping client.")
 				}

@@ -1,7 +1,0 @@
-# github.com/rjeczalik/notify v0.9.2
-## explicit
-github.com/rjeczalik/notify
-# golang.org/x/sys v0.0.0-20220624220833-87e55d714810
-## explicit; go 1.17
-golang.org/x/sys/internal/unsafeheader
-golang.org/x/sys/unix
