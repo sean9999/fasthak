@@ -1,4 +1,4 @@
-module fasthak
+module github.com/sean9999/fasthak
 
 go 1.20
 
