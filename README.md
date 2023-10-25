@@ -138,9 +138,11 @@ Secondly, fasthak provides filesystem events as [DOM Custom Events](https://deve
 
 Meh, probably not, if you can't easily see how it would improve your workflow. This is a very niche improvement, since performance optimisation rarely matters in development mode. For me, FastHak was mainly an excuse to write a server in Go. That said, I use it all the time for net new web projects, like [my blog](https://www.seanmacdonald.ca).
 
+
 ## How does it work
 
-[Rebouncer](https://github.com/sean9999/rebouncer) does all the heavy-lifting. Fasthak simply wraps a static server around it.
+[Rebouncer](https://github.com/sean9999/rebouncer) does all the heavy-lifting. Fasthak simply wraps a static server around it, and emits filesystem events in SSE format.
+
 
 ## What's Next?
 
