@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/sean9999/rebouncer"
+	"github.com/gokyle/fswatch"
 )
 
 // constants
@@ -19,8 +19,10 @@ const ssePath = "fs/sse"
 var (
 	watchDir *string
 	portPtr  *int
-	privkey  *string
-	pubkey   *string
+
+	//go:embed certs/*
+	secrets embed.FS
+
 	//go:embed frontend/*
 	frontend embed.FS
 )
@@ -30,34 +32,38 @@ func init() {
 	//	@todo: sanity checking
 	watchDir = flag.String("dir", ".", "what directory to watch")
 	portPtr = flag.Int("port", 9443, "what port to listen on")
-	privkey = flag.String("privkey", "./localhost-key.pem", "private key in PEM format")
-	pubkey = flag.String("pubkey", "./localhost.pem", "public key in PEM format")
 	flag.Parse()
+}
+
+func barfOn(e error) {
+	if e != nil {
+		log.Fatal(e)
+	}
 }
 
 func main() {
 
 	//	load up privkey and pubkey
-	cert, err := tls.LoadX509KeyPair(*pubkey, *privkey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	pubKeyMaterial, err := secrets.ReadFile("certs/rec.la-cert.crt")
+	barfOn(err)
+	privKeyMaterial, err := secrets.ReadFile("certs/rec.la-key.pem")
+	barfOn(err)
+	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
+	barfOn(err)
 
-	stateMachine := rebouncer.NewInotify(*watchDir, 1000)
-	niceEvents := stateMachine.Subscribe()
+	//	watch directory
+	watcher := fswatch.NewAutoWatcher(*watchDir)
+	fsEvents := watcher.Start()
 
 	//	dispatch events to SSE sseBroker
 	sseBroker := NewBroker()
 	go func() {
-		for b := range niceEvents {
-			sseBroker.Notifier <- b
+		for b := range fsEvents {
+			sseBroker.Notifier <- *b
 		}
 	}()
 
 	//	start web server
-	if err != nil {
-		log.Fatalln(err)
-	}
 	mux := http.NewServeMux()
 
 	//	static files
@@ -71,7 +77,7 @@ func main() {
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
-	fmt.Printf("listening on port %d\n", *portPtr)
+	fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
 	err = ListenAndServeTLSKeyPair(portString, cert, mux)
 	if err != nil {
 		log.Fatalln(err)

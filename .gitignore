@@ -1,6 +1,3 @@
-##	SSL
-*.pem
-
 ##	build artefacts
 build/
 

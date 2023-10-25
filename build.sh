@@ -2,12 +2,7 @@
 
 SEMVER="$(git tag --sort=-version:refname | head -n 1)"
 
-#	create the certificates. They will be embedded in the binary
-#	should create localhost.pem and locahost-key.pem
-#	the build will fail if those files don't exist.
-#	@see: https://github.com/FiloSottile/mkcert#readme
-
-#	mkcert -ecdsa localhost
+#	@note: certs should be renewed every so often: https://www.rec.la/
 
 #	build the binary
 go build -v \

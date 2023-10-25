@@ -5,32 +5,33 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/sean9999/rebouncer"
+	"github.com/gokyle/fswatch"
 )
 
 const patience time.Duration = time.Second * 1
 
-func StringifyEvent(ne rebouncer.NiceEvent) string {
-	dataToken := ne.Operation + "\n" + ne.File
+func StringifyEvent(ev fswatch.Notification) string {
+	dataToken := strconv.Itoa(ev.Event) + "\n" + ev.Path
 	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
-	return fmt.Sprintf("id: %d\nevent: fs\ndata: %s\nretry: 3001\n\n", ne.Id, data)
+	return fmt.Sprintf("id: %d\nevent: fs\ndata: %s\nretry: 3001\n\n", time.Now().Unix(), data)
 }
 
 type Broker struct {
-	Notifier       chan rebouncer.NiceEvent
-	newClients     chan chan rebouncer.NiceEvent
-	closingClients chan chan rebouncer.NiceEvent
-	clients        map[chan rebouncer.NiceEvent]bool
+	Notifier       chan fswatch.Notification
+	newClients     chan chan fswatch.Notification
+	closingClients chan chan fswatch.Notification
+	clients        map[chan fswatch.Notification]bool
 }
 
 func NewBroker() (broker *Broker) {
 	broker = &Broker{
-		Notifier:       make(chan rebouncer.NiceEvent, 1),
-		newClients:     make(chan chan rebouncer.NiceEvent),
-		closingClients: make(chan chan rebouncer.NiceEvent),
-		clients:        make(map[chan rebouncer.NiceEvent]bool),
+		Notifier:       make(chan fswatch.Notification, 1),
+		newClients:     make(chan chan fswatch.Notification),
+		closingClients: make(chan chan fswatch.Notification),
+		clients:        make(map[chan fswatch.Notification]bool),
 	}
 
 	// Set it running - listening and broadcasting events
@@ -54,7 +55,7 @@ func (broker *Broker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// Each connection registers its own message channel with the Broker's connections registry
-	messageChan := make(chan rebouncer.NiceEvent)
+	messageChan := make(chan fswatch.Notification)
 
 	// Signal the broker that we have a new connection
 	broker.newClients <- messageChan

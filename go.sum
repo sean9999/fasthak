@@ -1,7 +1,8 @@
-github.com/rjeczalik/notify v0.9.3 h1:6rJAzHTGKXGj76sbRgDiDcYj/HniypXmSJo1SWakZeY=
-github.com/rjeczalik/notify v0.9.3/go.mod h1:gF3zSOrafR9DQEWSE8TjfI9NkooDxbyT4UgRGKZA0lc=
-github.com/sean9999/rebouncer v0.0.5 h1:lfo2RU4KEIhCcKYMwedg0OlocKOkzmFg+/jCYK/CEMs=
-github.com/sean9999/rebouncer v0.0.5/go.mod h1:e3pVwY8dMeDUoD1CeN7zn5LWwRtBBnh/pfIjfNFDahY=
-golang.org/x/sys v0.0.0-20180926160741-c2ed4eda69e7/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
-golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
-golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69 h1:ZlqVKRbGps72I2GkDEhFoKyvbGtaJqOBm8XdC9JgJbg=
+github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69/go.mod h1:mPSEdAn8JDvRp/NN52qmojPflfPOFLPfQe361QrmvRE=
+github.com/sean9999/GoCards v0.0.5 h1:HZ2N57ITuVcnfn8o/ru3pPqlo0onTdyw5O1mTMT4tRM=
+github.com/sean9999/GoCards v0.0.5/go.mod h1:21YqLc+qDBGlHdndTm0spShWkq0kDvSfwFCnetiwphU=
+github.com/sean9999/GoFunctional v0.0.8 h1:E8d/lUZreB4iHNJiuHugRACe/1Gs92SC0dieDB9lAtQ=
+github.com/sean9999/GoFunctional v0.0.8/go.mod h1:EduEShASAZwJRpmcrvr3oMGVDo77b2dF0jpSBvttnec=
+github.com/sean9999/rebouncer v1.0.2 h1:wUfztX/AL6Dmqmitv8R3ioMbYVCMqfEzNp2/KmH0AoU=
+github.com/sean9999/rebouncer v1.0.2/go.mod h1:qIiQUxXPlzr3XzvRYbsJUbsma7dav8E0L1Dv/+FRaAM=
