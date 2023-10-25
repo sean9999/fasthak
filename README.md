@@ -11,18 +11,10 @@
 
 FastHak is a web server written in Go designed for rapid front-end development. It uses Server Sent Events for live-reload, and automatically injects the necessary javascript files, allowing you to get straight to developing your awesome web app.
 
-It is designed to serve on localhost using HTTPS, because modern web-apps need HTTPS to [do](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sending_events_from_the_server) [awesome](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API#specifications) [stuff](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API). You need to provide your own certs. I recommend [mkcert](https://github.com/FiloSottile/mkcert#readme).
+It is designed to serve on localhost using HTTPS, because modern web-apps need HTTPS to [do](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sending_events_from_the_server) [awesome](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API#specifications) [stuff](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API). It uses the awesome [rec.la](https://www.rec.la/) service for local HTTPS.
 
 
 ## Getting Started
-
-Install and run [mkcert](https://github.com/FiloSottile/mkcert), which will drop a localhost.pem and localhost-key.pem in your current directory. You should make sure you understand the [ramifications](https://github.com/FiloSottile/mkcert#installation) of what mkcert does.
-
-Install the certs
-
-```shell
-$ mkcert
-```
 
 Install fasthak:
 
@@ -33,20 +25,16 @@ go install github.com/sean9999/fasthak@latest
 assuming you want to start your server against the ./public subdirectory:
 
 ```
-$ fasthak -dir=./public
+$ fasthak -dir=./public # defaults to current dir
 ```
 
-which is the equivalent of:
+Use a different port with:
 
 ```
-$ fasthak \
-    -pubkey=./localhost.pem \
-    -privkey=./localhost-key.pem \
-    -dir=./public \
-    -port=9443
+$ fasthak -port=12345 # port defaults to 9443
 ```
 
-It will serve your app on `https://localhost:9443`, as you might expect. You'll want to at least have an `index.html` there.
+It will serve your app on `https://fasthak.rec.la:9443`. You'll want to at least have an `index.html` there.
 
 The client-side code is available at `https://localhost:9443/.hak/js/`. You do not need to include these files in your project. They are embedded in the server itself. You will want to point to them _from_ your project. Example:
 
@@ -134,21 +122,13 @@ SSE makes more sense than websockets, which is what traditional live-reloaders u
 Secondly, fasthak provides filesystem events as [DOM Custom Events](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986), or some other action that only you can anticipate. LiveReload has some degree of HMR (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
 
 
-## Should I switch from LiveReload?
-
-Meh, probably not, if you can't easily see how it would improve your workflow. This is a very niche improvement, since performance optimisation rarely matters in development mode. For me, FastHak was mainly an excuse to write a server in Go. That said, I use it all the time for net new web projects, like [my blog](https://www.seanmacdonald.ca).
-
-## How does it work
-
-[Rebouncer](https://github.com/sean9999/rebouncer) does all the heavy-lifting. Fasthak simply wraps a static server around it.
-
 ## What's Next?
 
-Due to it's design, FastHak could easily be extended to respond to events other than fileSystem events. For example, it could provide introspection capabilities to your otherwise static HTML site, or information about the server such as load and resource usage. There is no reason FastHak could not be used in production.
+FastHak could easily be extended to respond to events other than fileSystem events. For example, it could provide introspection capabilities to your otherwise static HTML site, or information about the server such as load and resource usage. There is no reason FastHak could not be used in production.
 
 Additionally, it would be useful to provide hooks for common frameworks, such as React and Vue.
 
-Furthermore, I would like to have a `fasthak init` command that automatically generates the minimal scaffolding needed of your static sites, and possibly generates certs too, freeing you from having to wrestle with mkcert.
+Also, I would like to have a `fasthak init` command that automatically generates the minimal scaffolding needed of your static sites.
 
 Finally, the client code should be available as a browser extension, so that it's injected into the page but not a part of your codebase.
 
