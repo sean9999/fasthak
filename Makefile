@@ -23,9 +23,8 @@ vendor:
 	go mod vendor
 
 deps:
-	curl https://dl.filippo.io/mkcert/latest?for=linux/amd64 -o ${BIN_FOLDER}/mkcert
-	chmod +x ${BIN_FOLDER}/mkcert
-	mkcert -install
+	curl --output-dir certs -O https://www.rec.la/rec.la-cert.crt
+	curl --output-dir certs -O https://www.rec.la/rec.la-key.pem
 
 install:
 	cp -f ${BUILD_FOLDER}/${BINARY_NAME} ${BIN_FOLDER}/
