@@ -1,5 +1,5 @@
 
-import hak from "./hak.js";
+import hak from "./hak";
 
 type registerSSE = () => Promise<EventSource>
 

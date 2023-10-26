@@ -71,23 +71,33 @@ But since fasthak provides some convenience functions out the box, you may as we
 
 > index.js
 ```js
-import { hak, registerSSE } from "./.hak/js/sse.js";
+import { registerSSE } from "./.hak/js/sse.js";
 
 registerSSE().then(sse => {
-    sse.addEventListener('fs', (event) => {
-
-        const payload = event.data;
-        console.log(payload);
     
-    }); 
+    //  your business logic
+    const biz = fsEvent => {
+
+        const payload = atob(fsEvent.data);
+        console.log(payload);
+        
+    };
+
+    //  attach your business logic to the fs event
+    sse.addEventListener('fs', biz);
+
+    //  it's polite to close your connection before leaving
+    window.addEventListener("beforeunload", sse.close);
+
 });
 ```
+
 > index.html
 ```html
 <!DOCTYPE html>
 <html>
     <head>
-        <script defer src="./index.js"></script>
+        <script type="module" src="./index.js"></script>
     </head>
     <body>
         <p>open console and have a look see</p>
@@ -99,20 +109,18 @@ Of course, that only registers the events. You must choose what to do in respons
 
 > index.js
 ```js
+import { registerSSE } from "./.hak/js/sse.js";
+
 registerSSE().then(sse => {
-    sse.addEventListener('fs', (event) => {
+    sse.addEventListener('fs', () => {
 
-        //  close the channel
-        //  not strictly necessary, but polite
+        //  close the channel. We're about to reload
         sse.close();
-
-        //  reload browser window
-        //  sse will reconnect on DOMContentLoaded
+        
         window.location.reload();
     
     }); 
 });
-
 ```
 
 ## Why Server Sent Events?

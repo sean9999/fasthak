@@ -1,8 +1,2 @@
 github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69 h1:ZlqVKRbGps72I2GkDEhFoKyvbGtaJqOBm8XdC9JgJbg=
 github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69/go.mod h1:mPSEdAn8JDvRp/NN52qmojPflfPOFLPfQe361QrmvRE=
-github.com/sean9999/GoCards v0.0.5 h1:HZ2N57ITuVcnfn8o/ru3pPqlo0onTdyw5O1mTMT4tRM=
-github.com/sean9999/GoCards v0.0.5/go.mod h1:21YqLc+qDBGlHdndTm0spShWkq0kDvSfwFCnetiwphU=
-github.com/sean9999/GoFunctional v0.0.8 h1:E8d/lUZreB4iHNJiuHugRACe/1Gs92SC0dieDB9lAtQ=
-github.com/sean9999/GoFunctional v0.0.8/go.mod h1:EduEShASAZwJRpmcrvr3oMGVDo77b2dF0jpSBvttnec=
-github.com/sean9999/rebouncer v1.0.2 h1:wUfztX/AL6Dmqmitv8R3ioMbYVCMqfEzNp2/KmH0AoU=
-github.com/sean9999/rebouncer v1.0.2/go.mod h1:qIiQUxXPlzr3XzvRYbsJUbsma7dav8E0L1Dv/+FRaAM=

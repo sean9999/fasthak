@@ -1,11 +1,16 @@
-BUILD_FOLDER=build
+BUILD_FOLDER=dist
 BINARY_NAME=fasthak
 BIN_FOLDER=/usr/local/bin
 REPO=github.com/sean9999/fasthak
 SEMVER := $$(git tag --sort=-version:refname | head -n 1)
 
+.PHONY: test
+
+info:
+	echo REPO is ${REPO} and SEMVER is ${SEMVER}
+
 build:
-	./build.sh
+	go build -v -ldflags="-X 'main.Version=${SEMVER}' -X 'app/build.Time=$(date)'" -o ./${BUILD_FOLDER}/
 
 docker-build:
 	docker build -t ${REPO}:${SEMVER} .
@@ -14,7 +19,7 @@ docker-run:
 	docker run -p 9001:9001 -v $${PWD}/public:/srv/public ${REPO}:${SEMVER}
 
 run:
-	./run.sh
+	go run *.go --dir=public --port=9443 
 
 tidy:
 	go mod tidy
@@ -32,3 +37,6 @@ install:
 clean:
 	go clean
 	rm ${BUILD_FOLDER}/${BINARY_NAME}
+
+publish:
+	GOPROXY=proxy.golang.org go list -m ${REPO}@${SEMVER}

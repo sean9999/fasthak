@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gokyle/fswatch"
@@ -13,8 +12,33 @@ import (
 
 const patience time.Duration = time.Second * 1
 
+// const (
+// 	NONE     = iota // No event, initial state.
+// 	CREATED         // File was created.
+// 	DELETED         // File was deleted.
+// 	MODIFIED        // File was modified.
+// 	PERM            // Changed permissions
+// 	NOEXIST         // File does not exist.
+// 	NOPERM          // No permissions for the file (see const block comment).
+// 	INVALID         // Any type of error not represented above.
+// )
+
+func EventToString(ev fswatch.Notification) string {
+	lookup := map[int]string{
+		0: "none",
+		1: "created",
+		2: "deleted",
+		3: "modified",
+		4: "changed_permissions",
+		5: "file_does_not_exist",
+		6: "no_permissions_for_file",
+		7: "invalid_event",
+	}
+	return fmt.Sprintf("%s\n%s", lookup[ev.Event], ev.Path)
+}
+
 func StringifyEvent(ev fswatch.Notification) string {
-	dataToken := strconv.Itoa(ev.Event) + "\n" + ev.Path
+	dataToken := EventToString(ev)
 	data := base64.StdEncoding.EncodeToString([]byte(dataToken))
 	return fmt.Sprintf("id: %d\nevent: fs\ndata: %s\nretry: 3001\n\n", time.Now().Unix(), data)
 }
