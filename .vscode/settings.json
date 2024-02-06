@@ -7,10 +7,6 @@
 		".flatpak/**": true,
 		"_build/**": true
 	},
-	"cSpell.ignoreWords": [
-		"Inotify",
-		"fsys"
-	],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#14028b",
         "activityBar.activeBorder": "#2f7c47",
