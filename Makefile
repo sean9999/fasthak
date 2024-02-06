@@ -1,16 +1,16 @@
 BUILD_FOLDER=dist
 BINARY_NAME=fasthak
-BIN_FOLDER=/usr/local/bin
+BIN_FOLDER := $$(go env GOPATH)/bin
 REPO=github.com/sean9999/fasthak
 SEMVER := $$(git tag --sort=-version:refname | head -n 1)
 
 .PHONY: test
 
 info:
-	echo REPO is ${REPO} and SEMVER is ${SEMVER}
+	echo REPO is ${REPO} and SEMVER is ${SEMVER} and BIN_FOLDER is ${BIN_FOLDER}
 
 build:
-	go build -v -ldflags="-X 'main.Version=${SEMVER}' -X 'app/build.Time=$(date)'" -o ./${BUILD_FOLDER}/
+	go build -v -ldflags="-X 'main.Version=${SEMVER}' -s -w" -o ./${BUILD_FOLDER}/${BINARY_NAME}
 
 docker-build:
 	docker build -t ${REPO}:${SEMVER} .
