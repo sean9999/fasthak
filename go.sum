@@ -1,2 +1,7 @@
 github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69 h1:ZlqVKRbGps72I2GkDEhFoKyvbGtaJqOBm8XdC9JgJbg=
 github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69/go.mod h1:mPSEdAn8JDvRp/NN52qmojPflfPOFLPfQe361QrmvRE=
+github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
+github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c/go.mod h1:7rwL4CYBLnjLxUqIJNnCWiEdr3bn6IUYi15bNlnbCCU=
+golang.org/x/sys v0.1.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.17.0 h1:25cE3gD+tdBA7lp7QfhuV+rJiE9YXTcS3VG1SqssI/Y=
+golang.org/x/sys v0.17.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=

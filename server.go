@@ -3,10 +3,13 @@ package main
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io/fs"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/pkg/browser"
 )
 
 type tcpKeepAliveListener struct {
@@ -47,6 +50,15 @@ func ListenAndServeTLSKeyPair(addr string, cert tls.Certificate, handler http.Ha
 	if err != nil {
 		return err
 	}
+
+	//fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
+
+	url := fmt.Sprintf("https://%s.rec.la:%s", *subDomainPtr, server.Addr)
+
+	//fmt.Println(url)
+
+	browser.OpenURL(url)
+
 	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, config)
 	return server.Serve(tlsListener)
 }

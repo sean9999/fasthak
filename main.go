@@ -17,8 +17,9 @@ const hakPrefix = "/.hak"
 const ssePath = "fs/sse"
 
 var (
-	watchDir *string
-	portPtr  *int
+	watchDir     *string
+	subDomainPtr *string
+	portPtr      *int
 
 	//go:embed certs/*
 	secrets embed.FS
@@ -31,7 +32,8 @@ func init() {
 	//	parse options and arguments
 	//	@todo: sanity checking
 	watchDir = flag.String("dir", ".", "what directory to watch")
-	portPtr = flag.Int("port", 9443, "what port to listen on")
+	subDomainPtr = flag.String("subdomain", "fasthak", "what subomain on rec.la to use")
+	portPtr = flag.Int("port", 0, "what port to listen on")
 	flag.Parse()
 }
 
@@ -77,8 +79,9 @@ func main() {
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
-	fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
+	//fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
 	err = ListenAndServeTLSKeyPair(portString, cert, mux)
+
 	if err != nil {
 		log.Fatalln(err)
 	}

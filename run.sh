@@ -4,4 +4,4 @@
 ##	production mode would look like this:
 ##	fasthak -dir=public --port=9443
 
-go run *.go --dir=public --port=9443 
+go run *.go --dir=public
