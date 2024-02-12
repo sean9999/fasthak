@@ -130,6 +130,15 @@ SSE makes more sense than websockets, which is what traditional live-reloaders u
 Secondly, fasthak provides filesystem events as [DOM Custom Events](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). You choose what you want to do with those events, which in the simplest case is to reload your browser, but could just as easily leverage [Hot Module Replacement](https://blog.bitsrc.io/webpacks-hot-module-replacement-feature-explained-43c13b169986), or some other action that only you can anticipate. LiveReload has some degree of HMR (stylesheets and images are reloaded via javascript), but it's brittle on non-configurable. FastHak gives you total control.
 
 
+## Should I switch from LiveReload?
+
+This is a very niche improvement, since performance optimisation rarely matters in development mode. For me, FastHak was mainly an excuse to write a server in Go. That said, I use it all the time for net new web projects, like [my blog](https://www.seanmacdonald.ca) and for rapid iteration on ES6 experiments.
+
+## How does it work
+
+[Rebouncer](https://github.com/sean9999/rebouncer) does all the heavy-lifting. Fasthak simply wraps a static server around it, and emits filesystem events in SSE format.
+
+
 ## What's Next?
 
 FastHak could easily be extended to respond to events other than fileSystem events. For example, it could provide introspection capabilities to your otherwise static HTML site, or information about the server such as load and resource usage. There is no reason FastHak could not be used in production.
