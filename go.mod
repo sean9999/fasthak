@@ -1,5 +1,11 @@
 module github.com/sean9999/fasthak
 
-go 1.21.1
+go 1.22.0
 
-require github.com/gokyle/fswatch v0.0.0-20121217010029-1dbdf8320a69
+require github.com/sean9999/go-fsnotify-recursively v0.0.9
+
+require (
+	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+)

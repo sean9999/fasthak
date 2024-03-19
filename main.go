@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/gokyle/fswatch"
+	gorph "github.com/sean9999/go-fsnotify-recursively"
 )
 
 // constants
@@ -52,16 +52,28 @@ func main() {
 	barfOn(err)
 
 	//	watch directory
-	watcher := fswatch.NewAutoWatcher(*watchDir)
-	fsEvents := watcher.Start()
+	watcher, _ := gorph.New(fmt.Sprintf("%s/**", *watchDir))
+	fsEvents, _ := watcher.Listen()
 
-	//	dispatch events to SSE sseBroker
-	sseBroker := NewBroker()
+	//	braodcast to all cients
+	sseBroker := NewBroadcaster[gorph.GorphEvent]()
+
 	go func() {
-		for b := range fsEvents {
-			sseBroker.Notifier <- *b
+		for ev := range fsEvents {
+			sseBroker.Broadcast(ev)
 		}
 	}()
+
+	//watcher := fswatch.NewAutoWatcher(*watchDir)
+	//fsEvents := watcher.Start()
+
+	//	dispatch events to SSE sseBroker
+	// sseBroker := NewBroker()
+	// go func() {
+	// 	for b := range fsEvents {
+	// 		sseBroker.Notifier <- *b
+	// 	}
+	// }()
 
 	//	start web server
 	mux := http.NewServeMux()
