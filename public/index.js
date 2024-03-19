@@ -14,14 +14,14 @@ window.addEventListener("load", () => {
 	registerSSE().then(sse => {
 
 		//	these may be useful for debugging
-		sse.addEventListener('open', (stuff) => {console.log('sse open',stuff)});
-		sse.addEventListener('message', (stuff) => {console.log('sse message',stuff)});
-		sse.addEventListener('error', (stuff) => {console.error('sse error',stuff)});
+		//sse.addEventListener('open', (stuff) => {console.log('sse open',stuff)});
+		//sse.addEventListener('message', (stuff) => {console.log('sse message',stuff)});
+		//sse.addEventListener('error', (stuff) => {console.error('sse error',stuff)});
 
 		sse.addEventListener('fs', ev => {
 			const [macroEvent, microEvent, filePath] = ev.data.split("\n")
 
-			console.log({macroEvent, microEvent, filePath});
+			//console.log({macroEvent, microEvent, filePath});
 
 
 			//	maybe you could do something more intelligent 
@@ -32,19 +32,9 @@ window.addEventListener("load", () => {
 		
 			debug('fsevents', {microEvent, filePath});
 
-			//	allow for debounce time 
-			//	since fsEvents seem to happen in clusters
+			window.location.reload();
 			
-			// hak.waitFor(1000).then(() => {
-			// 	if (sse.readyState === 1) {
-			// 		sse.close();
-			// 	}
-			// 	window.location.reload();
-			// });
-		
-
-			window.addEventListener('beforeunload',(ev) => {
-				//ev.preventDefault();
+			window.addEventListener('beforeunload', () => {
 				if (sse.readyState === 1) {
 					sse.close();
 				}
