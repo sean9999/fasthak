@@ -64,6 +64,7 @@ func main() {
 	//	broadcsast debounced events
 	go func() {
 		for ev := range debouncer.Subscribe() {
+			fmt.Println(ev)
 			sseBroker.Broadcast(ev)
 		}
 	}()

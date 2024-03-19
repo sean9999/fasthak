@@ -21,10 +21,19 @@ func debounce(messyEvents chan gev) rebouncer.Rebouncer[gev] {
 	//	simply accumulate all events except ones involving .DS_Store
 	var reduceFn rebouncer.Reducer[gev] = func(evs []gev) []gev {
 		out := make([]gev, 0)
-		for _, ev := range evs {
+		for _, thisEv := range evs {
 			//	@todo: filter out tmp files
-			if ev.Path != ".DS_Store" {
-				out = append(out, ev)
+			if thisEv.Path != ".DS_Store" {
+				isUnique := true
+				for _, thatEv := range out {
+					if thatEv.Path == thisEv.Path {
+						isUnique = false
+						break
+					}
+				}
+				if isUnique {
+					out = append(out, thisEv)
+				}
 			}
 		}
 		return out
