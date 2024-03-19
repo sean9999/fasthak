@@ -51,9 +51,8 @@ func (b *broadcaster[T]) Incoming() chan T {
 }
 
 func (b *broadcaster[T]) Broadcast(msg T) {
-	fmt.Println("broadcast", len(b.clients))
 	for ch := range b.clients {
-		fmt.Println(ch)
+		fmt.Println(msg)
 		ch <- msg
 	}
 }

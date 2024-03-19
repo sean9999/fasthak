@@ -5,6 +5,7 @@ body {
 
 img.hero {
 	width: 100%;
+	border: 2px solid rgb(81, 4, 81);
 }
 
 nav {
@@ -14,8 +15,4 @@ nav {
 
 nav a {
 	margin: 0 0.25em;
-}
-
-#asdfasdf  {
-	color: red;
 }

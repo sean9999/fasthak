@@ -4,7 +4,7 @@ div#debug {
 	font-family: 'Fira Code', monospace;
 	white-space: pre-line;
 	color: black;
-	font-size: 10pt;
+	font-size: 8pt;
 }
 
 div#debug li {
@@ -17,6 +17,7 @@ div#debug section h3 {
 
 div#debug section ul {
 	margin-top: 0;
+	padding-left: 0;
 }
 
 body.fouc {

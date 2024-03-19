@@ -43,7 +43,7 @@ func barfOn(e error) {
 
 func main() {
 
-	//	load up privkey and pubkey
+	//	load up TLS certs
 	pubKeyMaterial, err := secrets.ReadFile("certs/rec.la-cert.crt")
 	barfOn(err)
 	privKeyMaterial, err := secrets.ReadFile("certs/rec.la-key.pem")
@@ -58,24 +58,23 @@ func main() {
 	//	braodcast to all cients
 	sseBroker := NewBroadcaster[gorph.GorphEvent]()
 
+	//	debounce noisy events
+	debouncer := debounce(fsEvents)
+
+	//	broadcsast debounced events
 	go func() {
-		for ev := range fsEvents {
+		for ev := range debouncer.Subscribe() {
 			sseBroker.Broadcast(ev)
 		}
 	}()
 
-	//watcher := fswatch.NewAutoWatcher(*watchDir)
-	//fsEvents := watcher.Start()
-
-	//	dispatch events to SSE sseBroker
-	// sseBroker := NewBroker()
 	// go func() {
-	// 	for b := range fsEvents {
-	// 		sseBroker.Notifier <- *b
+	// 	for ev := range fsEvents {
+	// 		fmt.Println("fsEvent", ev)
+	// 		sseBroker.Broadcast(ev)
 	// 	}
 	// }()
 
-	//	start web server
 	mux := http.NewServeMux()
 
 	//	static files
@@ -88,6 +87,7 @@ func main() {
 	//	./hak/fs/sse
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
+	//	start server
 	portString := fmt.Sprintf("%s%d", ":", *portPtr)
 	fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
 	err = ListenAndServeTLSKeyPair(portString, cert, mux)
