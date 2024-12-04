@@ -19,17 +19,13 @@ docker-run:
 	docker run -p 9001:9001 -v $${PWD}/public:/srv/public ${REPO}:${SEMVER}
 
 run:
-	go run *.go --dir=public --port=9443 
+	source env.sh && go run *.go --dir=public --port=9443 
 
 tidy:
 	go mod tidy
 
 vendor:
 	go mod vendor
-
-deps:
-	curl --output-dir certs -O https://www.rec.la/rec.la-cert.crt
-	curl --output-dir certs -O https://www.rec.la/rec.la-key.pem
 
 install:
 	cp -f ${BUILD_FOLDER}/${BINARY_NAME} ${BIN_FOLDER}/
