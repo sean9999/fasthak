@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path"
 
 	gorph "github.com/sean9999/go-fsnotify-recursively"
@@ -44,12 +45,12 @@ func barfOn(e error) {
 func main() {
 
 	//	load up TLS certs
-	pubKeyMaterial, err := secrets.ReadFile("certs/rec.la-cert.crt")
-	barfOn(err)
-	privKeyMaterial, err := secrets.ReadFile("certs/rec.la-key.pem")
-	barfOn(err)
-	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
-	barfOn(err)
+	// pubKeyMaterial, err := secrets.ReadFile("certs/rec.la-cert.crt")
+	// barfOn(err)
+	// privKeyMaterial, err := secrets.ReadFile("certs/rec.la-key.pem")
+	// barfOn(err)
+	// cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
+	// barfOn(err)
 
 	//	watch directory
 	watcher, _ := gorph.New(fmt.Sprintf("%s/**", *watchDir))
@@ -88,12 +89,16 @@ func main() {
 	//	./hak/fs/sse
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
+	// provision a certificate and create the TLS listener
+	ln, _ := tls.Listen("tcp", ":"+os.Getenv("HTTPS_PORT"), AnchorCert())
+	// Start the https server
+	http.Serve(ln, mux)
+
 	//	start server
-	portString := fmt.Sprintf("%s%d", ":", *portPtr)
-	fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
-	err = ListenAndServeTLSKeyPair(portString, cert, mux)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
+	// err = ListenAndServeTLSKeyPair(portString, cert, mux)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
 }
