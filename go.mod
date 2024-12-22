@@ -1,6 +1,6 @@
 module github.com/sean9999/fasthak
 
-go 1.22.0
+go 1.23.0
 
 require (
 	github.com/sean9999/go-fsnotify-recursively v0.1.3

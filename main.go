@@ -1,13 +1,11 @@
 package main
 
 import (
-	"crypto/tls"
 	"embed"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"path"
 
 	gorph "github.com/sean9999/go-fsnotify-recursively"
@@ -81,18 +79,13 @@ func main() {
 
 	//	static files
 	staticFileServer := http.FileServer(http.Dir(*watchDir))
-	mux.Handle("/", injectHeadersForStaticFiles(staticFileServer))
+	mux.Handle("/", injectHeaders(staticFileServer))
 
 	//	.hak/js/*
 	mux.Handle(hakPrefix+"/js/", hakHandler())
 
 	//	./hak/fs/sse
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
-
-	// provision a certificate and create the TLS listener
-	ln, _ := tls.Listen("tcp", ":"+os.Getenv("HTTPS_PORT"), AnchorCert())
-	// Start the https server
-	http.Serve(ln, mux)
 
 	//	start server
 	// fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
