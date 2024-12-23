@@ -19,7 +19,7 @@ docker-run:
 	docker run -p 9001:9001 -v $${PWD}/public:/srv/public ${REPO}:${SEMVER}
 
 run:
-	source env.sh && go run *.go --dir=public --port=9443 
+	go run . --dir=public --port=9443 
 
 tidy:
 	go mod tidy
