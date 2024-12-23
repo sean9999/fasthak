@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	gorph "github.com/sean9999/go-fsnotify-recursively"
@@ -18,22 +19,25 @@ func debounce(messyEvents chan gev) rebouncer.Rebouncer[gev] {
 		}
 	}
 
-	//	simply accumulate all events except ones involving .DS_Store
+	//	accumulate all events except ones involving .DS_Store and .git/**
 	var reduceFn rebouncer.Reducer[gev] = func(evs []gev) []gev {
 		out := make([]gev, 0)
 		for _, thisEv := range evs {
-			//	@todo: filter out tmp files
-			if thisEv.Path != ".DS_Store" {
-				isUnique := true
-				for _, thatEv := range out {
-					if thatEv.Path == thisEv.Path {
-						isUnique = false
-						break
-					}
+			if strings.HasPrefix(thisEv.Path, ".git") {
+				continue
+			}
+			if thisEv.Path == ".DS_Store" {
+				continue
+			}
+			isUnique := true
+			for _, thatEv := range out {
+				if thatEv.Path == thisEv.Path {
+					isUnique = false
+					break
 				}
-				if isUnique {
-					out = append(out, thisEv)
-				}
+			}
+			if isUnique {
+				out = append(out, thisEv)
 			}
 		}
 		return out

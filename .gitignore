@@ -8,3 +8,6 @@ dist/
 
 ##	CI/CD
 publish.sh
+
+##  secrets
+env.sh

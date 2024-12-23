@@ -9,29 +9,27 @@ import (
 	"net/http"
 	"path"
 
+	"github.com/sean9999/fasthak/certs"
 	gorph "github.com/sean9999/go-fsnotify-recursively"
 )
 
 // constants
 const hakPrefix = "/.hak"
 const ssePath = "fs/sse"
+const domain = "backloop.dev"
 
 var (
-	watchDir *string
-	portPtr  *int
-
-	//go:embed certs/*
-	secrets embed.FS
+	dir  *string
+	port *int
 
 	//go:embed frontend/*
 	frontend embed.FS
 )
 
 func init() {
-	//	parse options and arguments
-	//	@todo: sanity checking
-	watchDir = flag.String("dir", ".", "what directory to watch")
-	portPtr = flag.Int("port", 9443, "what port to listen on")
+	//	parse options and args
+	dir = flag.String("dir", ".", "what directory to watch")
+	port = flag.Int("port", 9443, "what port to listen on")
 	flag.Parse()
 }
 
@@ -43,16 +41,8 @@ func barfOn(e error) {
 
 func main() {
 
-	//	load up TLS certs
-	pubKeyMaterial, err := secrets.ReadFile("certs/rec.la-cert.crt")
-	barfOn(err)
-	privKeyMaterial, err := secrets.ReadFile("certs/rec.la-key.pem")
-	barfOn(err)
-	cert, err := tls.X509KeyPair(pubKeyMaterial, privKeyMaterial)
-	barfOn(err)
-
 	//	watch directory
-	watcher, _ := gorph.New(fmt.Sprintf("%s/**", *watchDir))
+	watcher, _ := gorph.New(fmt.Sprintf("%s/**", *dir))
 	fsEvents, _ := watcher.Listen()
 
 	//	braodcast to all cients
@@ -64,23 +54,20 @@ func main() {
 	//	broadcsast debounced events
 	go func() {
 		for ev := range debouncer.Subscribe() {
-			fmt.Println(ev)
+
+			if ev.NotifyEvent.Name != "CHMOD" {
+				fmt.Println(ev)
+			}
+
 			sseBroker.Broadcast(ev)
 		}
 	}()
 
-	// go func() {
-	// 	for ev := range fsEvents {
-	// 		fmt.Println("fsEvent", ev)
-	// 		sseBroker.Broadcast(ev)
-	// 	}
-	// }()
-
 	mux := http.NewServeMux()
 
 	//	static files
-	staticFileServer := http.FileServer(http.Dir(*watchDir))
-	mux.Handle("/", injectHeadersForStaticFiles(staticFileServer))
+	staticFileServer := http.FileServer(http.Dir(*dir))
+	mux.Handle("/", injectHeaders(staticFileServer))
 
 	//	.hak/js/*
 	mux.Handle(hakPrefix+"/js/", hakHandler())
@@ -88,12 +75,13 @@ func main() {
 	//	./hak/fs/sse
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
+	cert, err := tls.X509KeyPair(certs.Cert, certs.Key)
+	barfOn(err)
+
 	//	start server
-	portString := fmt.Sprintf("%s%d", ":", *portPtr)
-	fmt.Printf("running on https://fasthak.rec.la:%d\n\n", *portPtr)
-	err = ListenAndServeTLSKeyPair(portString, cert, mux)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	url := fmt.Sprintf("%s:%d", domain, *port)
+	fmt.Printf("running on https://%s\n\n", url)
+	err = ListenAndServeTLSKeyPair(fmt.Sprintf(":%d", *port), cert, mux)
+	barfOn(err)
 
 }

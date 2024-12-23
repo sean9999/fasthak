@@ -28,8 +28,7 @@ func ListenAndServeTLSKeyPair(addr string, cert tls.Certificate, handler http.Ha
 	if addr == "" {
 		return errors.New("invalid address string")
 	}
-	server := &http.Server{Addr: addr, Handler: handler}
-	config := &tls.Config{
+	cfg := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
 		PreferServerCipherSuites: true,
@@ -39,19 +38,26 @@ func ListenAndServeTLSKeyPair(addr string, cert tls.Certificate, handler http.Ha
 			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 		},
+		Certificates: []tls.Certificate{cert},
+		ServerName:   domain,
 	}
-	config.NextProtos = []string{"http/1.1"}
-	config.Certificates = make([]tls.Certificate, 1)
-	config.Certificates[0] = cert
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      handler,
+		TLSConfig:    &tls.Config{},
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, config)
-	return server.Serve(tlsListener)
+
+	//return srv.ListenAndServeTLS(certFile string, keyFile string)
+	tlsListener := tls.NewListener(ln, cfg)
+	return srv.Serve(tlsListener)
 }
 
-func injectHeadersForStaticFiles(fs http.Handler) http.HandlerFunc {
+func injectHeaders(fs http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store, max-age=1")
 		fs.ServeHTTP(w, r)
