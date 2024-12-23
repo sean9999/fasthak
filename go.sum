@@ -1,3 +1,5 @@
+github.com/abc-inc/browser v1.0.1 h1:2DU6rpG/j0NMfMSFR2fZy/1GE7Mm39xtg7DXVuKbEJs=
+github.com/abc-inc/browser v1.0.1/go.mod h1:xhruOj6p2gjjBN3q84P9BNoENMU2euR8Io5beHp+hAw=
 github.com/bmatcuk/doublestar/v4 v4.6.1 h1:FH9SifrbvJhnlQpztAx++wlkk70QBf0iBWDwNy7PA4I=
 github.com/bmatcuk/doublestar/v4 v4.6.1/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=

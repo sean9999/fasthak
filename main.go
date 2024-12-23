@@ -4,12 +4,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"log"
-	"net/http"
-	"path"
-
-	"github.com/sean9999/fasthak/certs"
-	gorph "github.com/sean9999/go-fsnotify-recursively"
 )
 
 const (
@@ -33,54 +27,26 @@ func init() {
 	flag.Parse()
 }
 
-func barfOn(e error) {
-	if e != nil {
-		log.Fatal(e)
-	}
-}
-
 func main() {
 
-	//	watch directory
-	watcher, _ := gorph.New(fmt.Sprintf("%s/**", *dir))
-	fsEvents, _ := watcher.Listen()
+	args := flag.Args()
+	subcommand := "serve"
 
-	//	braodcast to all cients
-	sseBroker := NewBroadcaster[gorph.GorphEvent]()
+	if len(args) > 0 {
+		subcommand = args[0]
+	}
 
-	//	debounce noisy events
-	debouncer := debounce(fsEvents)
+	switch subcommand {
+	case "", "serve":
+		err := serve()
+		barfOn(err)
 
-	//	broadcsast debounced events
-	go func() {
-		for ev := range debouncer.Subscribe() {
+	case "init":
+		boilerplate()
 
-			if ev.NotifyEvent.Name != "CHMOD" {
-				fmt.Println(ev)
-			}
+	default:
+		fmt.Println("unsupported subcommand")
 
-			sseBroker.Broadcast(ev)
-		}
-	}()
-
-	mux := http.NewServeMux()
-
-	//	static files
-	staticFileServer := http.FileServer(http.Dir(*dir))
-	mux.Handle("/", injectHeaders(staticFileServer))
-
-	//	.hak/js/*
-	mux.Handle(hakPrefix+"/js/", hakHandler())
-
-	//	./hak/fs/sse
-	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
-
-	cert, err := certs.KeyPair()
-	barfOn(err)
-
-	//	start server
-	fmt.Printf("running on %s:%d", domain, *port)
-	err = ListenAndServeTLSKeyPair(fmt.Sprintf(":%d", *port), cert, mux)
-	barfOn(err)
+	}
 
 }

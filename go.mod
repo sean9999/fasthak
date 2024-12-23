@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/abc-inc/browser v1.0.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
