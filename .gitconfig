@@ -1,3 +1,3 @@
 [filter "obfuscatecerts"]
-        clean = ./certs/clean.sh clean
-        smudge = ./certs/smudge.sh smudge
+        clean = ../certs/clean.sh clean
+        smudge = ../certs/smudge.sh smudge
