@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"embed"
 	"flag"
 	"fmt"
@@ -13,10 +12,11 @@ import (
 	gorph "github.com/sean9999/go-fsnotify-recursively"
 )
 
-// constants
-const hakPrefix = "/.hak"
-const ssePath = "fs/sse"
-const domain = "backloop.dev"
+const (
+	hakPrefix = "/.hak"
+	ssePath   = "fs/sse"
+	domain    = "backloop.dev"
+)
 
 var (
 	dir  *string
@@ -75,12 +75,11 @@ func main() {
 	//	./hak/fs/sse
 	mux.Handle(path.Join(hakPrefix, ssePath), sseBroker)
 
-	cert, err := tls.X509KeyPair(certs.Cert, certs.Key)
+	cert, err := certs.KeyPair()
 	barfOn(err)
 
 	//	start server
-	url := fmt.Sprintf("%s:%d", domain, *port)
-	fmt.Printf("running on https://%s\n\n", url)
+	fmt.Printf("running on %s:%d", domain, *port)
 	err = ListenAndServeTLSKeyPair(fmt.Sprintf(":%d", *port), cert, mux)
 	barfOn(err)
 
