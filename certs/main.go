@@ -38,11 +38,11 @@ func getFile(filesystem fs.FS, name string) (fs.File, error) {
 
 func KeyPair() (tls.Certificate, error) {
 	var noCert tls.Certificate
-	cert, err := decompress(getFile(folder, "backloop.dev-ca.crt"))
+	cert, err := decompress(getFile(folder, "backloop.dev-cert.crt.gz"))
 	if err != nil {
 		return noCert, fmt.Errorf("could not create key-pair. %w", err)
 	}
-	key, err := decompress(getFile(folder, "backloop.dev-key.pem"))
+	key, err := decompress(getFile(folder, "backloop.dev-key.pem.gz"))
 	if err != nil {
 		return noCert, fmt.Errorf("could not create key-pair. %w", err)
 	}
